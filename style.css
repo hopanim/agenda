@@ -1,0 +1,253 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    color: #555;
+}
+
+section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #eee;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input[type="number"] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100px;
+}
+
+#artist-agenda-list {
+    list-style: none;
+    padding: 0;
+}
+
+#artist-agenda-list li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: grab;
+    position: relative; /* Added for pseudo-element positioning */
+}
+
+/* Visual distinction for rows */
+#artist-agenda-list li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle grey overlay */
+    border-radius: 4px;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.2s ease; /* Smooth transition for hover effect */
+    z-index: -1;
+}
+#artist-agenda-list li:nth-child(even)::before {
+    background-color: rgba(0, 0, 128, 0.05); /* Subtle alternative grey overlay */
+}
+
+/* Show overlay on hover and drag */
+#artist-agenda-list li:hover::before,
+#artist-agenda-list.sortable-drag li::before {
+    opacity: 1; /* Show overlay */
+}
+
+#artist-agenda-list li.active-artist {
+    background-color: #e0f7fa; /* Light Cyan for active artist */
+    border: 2px solid #26c6da; /* Cyan border */
+}
+#artist-agenda-list li.completed-artist {
+    background-color: #f0f0f0;
+    color: #777;
+    text-decoration: line-through;
+}
+
+
+.artist-details {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Vertically center items */
+    gap: 10px;    /* Add some space between elements*/
+    flex-grow: 1;
+    z-index:1; /* details render above pseudo element background */
+
+}
+.artist-details input[type="text"]{
+    margin-right: auto; /* Push name input to the left */
+
+}
+.artist-shots-input {
+    width: 50px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+}
+
+.estimated-time {
+    margin-left: auto;
+    font-style: italic;
+    color: #777;
+    margin-right: 10px;
+    z-index:1; /* details render above pseudo element background */
+
+}
+.estimated-time.negative-time {
+    color: red;
+    font-weight: bold;
+}
+
+/* CHANGES START HERE */
+.agenda-actions button,  #current-artist-section button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5cb85c; /* Default green color */
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+#add-artist-btn, /* Apply blue to Add Artist */
+#add-time-btn {
+    background-color: #008CBA;
+}
+
+#next-artist-btn {
+    background-color: #00c853;
+}
+/* Hover effect for all buttons except disabled ones. */
+.agenda-actions button:not(:disabled):hover,
+#current-artist-section button:not(:disabled):hover {
+    opacity: 0.9;
+}
+
+#next-artist-btn:disabled {
+    background-color: #ccc;
+    cursor: default;
+}
+/* END CHANGES */
+
+#current-artist-section {
+    background-color: #dcedc8; /* Light Green */
+    border: 2px solid #8bc34a; /* Green border */
+}
+#current-artist-section h2 {
+    color: #388e3c; /* Dark Green */
+}
+
+.current-artist-info {
+    padding: 10px;
+}
+.current-artist-info div {
+    margin-bottom: 5px;
+}
+.current-artist-info span {
+    font-weight: bold;
+}
+
+/* Styling for stacked layout and bold labels */
+.summary-stack {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-stack > div {
+    margin-bottom: 5px;
+}
+
+.summary-label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+
+/* Drag and Drop Styles (optional, but can enhance visual feedback) */
+#artist-agenda-list.sortable-ghost {
+    opacity: 0.7;
+    background: #c8e6c9;
+}
+#artist-agenda-list.sortable-drag {
+    /* Example: subtle styling while dragging */
+}
+#artist-agenda-list li.sortable-chosen {
+    /* Example: style of the chosen element */
+}
+
+/* Style the delete button */
+.delete-artist-btn {
+    background-color: #ff6347; /* Tomato red */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px; /* Add space */
+    z-index:1; /* details render above pseudo element background */
+}
+
+.delete-artist-btn:hover {
+    background-color: #e74c3c; /* Darker red on hover */
+}
+.completed-artist .artist-shots-input,
+.completed-artist .artist-name-input {
+    text-decoration: line-through;
+}
+
+/* New class for the large Start Review button */
+.big-button {
+    font-size: 24px;
+    padding: 15px 30px;
+    width: auto; /* Let the button size to content */
+    background-color: #5cb85c; /*  Green */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase; /* Optional: Make text uppercase */
+    font-weight: bold; /* Optional: Make text bold */
+}
+
+.big-button:hover {
+    opacity: 0.9; /*  Green hover */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow on hover */
+}
+
+/*Specificity Increase and combine selectors*/
+#session-control-section .big-button:disabled {
+  background-color: #ccc;
+  cursor: default;
+  box-shadow: none; /* Remove hover shadow when disabled */
+}
