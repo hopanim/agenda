@@ -26,6 +26,11 @@ section {
     background-color: #eee;
 }
 
+.top-sections-wrapper {
+    max-width: 500px; /* Adjust as needed */
+    /* Removed margin: 0 auto;  Left-align now */
+}
+
 .input-group {
     margin-bottom: 10px;
 }
@@ -198,6 +203,9 @@ section {
 .summary-label {
     font-weight: bold;
     margin-right: 5px;
+    display: inline-block; /* Important for consistent width */
+    width: 100px;          /* Adjust as needed */
+    text-align: right;    /* Right-align the text */
 }
 
 #artist-agenda-list.sortable-ghost {
@@ -283,16 +291,15 @@ section {
     color: #ffffff;
 }
 
-/* New styles for the two-column layout */
+/* Styles for the two-column layout */
 .bottom-section-container {
     display: flex;        /* Enable Flexbox */
     flex-direction: row;  /* Arrange children side-by-side */
     gap: 20px;           /* Add some space between the columns */
-    justify-content: flex-start; /* Changed to flex-start*/
+    justify-content: flex-start; /* Left-align the columns */
 }
 
 .bottom-section-container > section {
     flex: 0 1 auto; /*  Don't grow, shrink if needed, auto width */
-    margin-bottom: 0; /* Remove the default margin-bottom to avoid extra spacing */
-
+    margin-bottom: 0; /* Remove the default margin-bottom */
 }

@@ -11,40 +11,41 @@
     <div class="container">
         <h1>Animation Review Tool</h1>
 
-        <section id="setup-section">
-            <h2>Agenda Setup</h2>
-            <div class="input-group">
-                <label for="total-artists">Total Artists:</label>
-                <input type="number" id="total-artists" value="5" min="1">
-            </div>
-            <div class="input-group">
-                <label for="total-time">Total Review Time (minutes):</label>
-                <input type="number" id="total-time" value="60" min="1">
-            </div>
-        </section>
+        <div class="top-sections-wrapper">
+            <section id="setup-section">
+                <h2>Agenda Setup</h2>
+                <div class="input-group">
+                    <label for="total-artists">Total Artists:</label>
+                    <input type="number" id="total-artists" value="5" min="1">
+                </div>
+                <div class="input-group">
+                    <label for="total-time">Total Review Time (minutes):</label>
+                    <input type="number" id="total-time" value="60" min="1">
+                </div>
+            </section>
 
-        <section id="agenda-management-section">
-            <h2>Agenda Management</h2>
-            <ul id="artist-agenda-list">
-            </ul>
-            <div class="agenda-actions">
-                <button id="add-artist-btn">Add Artist</button>
-                <button id="add-time-btn">Add Session Time (min)</button>
-                <input type="number" id="add-time-input" value="5" min="1" style="width: 60px;">
-            </div>
-        </section>
+            <section id="agenda-management-section">
+                <h2>Agenda Management</h2>
+                <ul id="artist-agenda-list">
+                </ul>
+                <div class="agenda-actions">
+                    <button id="add-artist-btn">Add Artist</button>
+                    <button id="add-time-btn">Add Session Time (min)</button>
+                    <input type="number" id="add-time-input" value="5" min="1" style="width: 60px;">
+                </div>
+            </section>
 
-        <section id="session-control-section">
-            <button id="start-review-btn" class="big-button">Start Review</button>
-        </section>
-
-        <div class="bottom-section-container">  <section id="real-time-tracking-section">
+            <section id="session-control-section">
+                <button id="start-review-btn" class="big-button">Start Review</button>
+            </section>
+        </div> <div class="bottom-section-container">
+            <section id="real-time-tracking-section">
                 <h2>SUMMARY TOTALS</h2>
                 <div class="summary-stack">
-                    <div><span class="summary-label">Total Shots in Agenda:</span> <span id="total-shots-display">0</span></div>
-                    <div><span class="summary-label">Total Time Remaining:</span> <span id="total-time-remaining-display">00:00</span></div>
-                    <div><span class="summary-label">Total People Remaining:</span> <span id="total-people-remaining-display">0</span></div>
-                    <div><span class="summary-label">Total Shots Remaining:</span> <span id="total-shots-remaining-display">0</span></div>
+                    <div><span class="summary-label">Total Shots:</span> <span id="total-shots-display">0</span></div>
+                    <div><span class="summary-label">Time:</span> <span id="total-time-remaining-display">00:00</span></div>
+                    <div><span class="summary-label">People:</span> <span id="total-people-remaining-display">0</span></div>
+                    <div><span class="summary-label">Shots:</span> <span id="total-shots-remaining-display">0</span></div>
                 </div>
             </section>
 
@@ -57,7 +58,8 @@
                 </div>
                 <button id="next-artist-btn" disabled>Next Artist</button>
             </section>
-        </div> </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
