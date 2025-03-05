@@ -288,12 +288,11 @@ section {
     display: flex;        /* Enable Flexbox */
     flex-direction: row;  /* Arrange children side-by-side */
     gap: 20px;           /* Add some space between the columns */
-    justify-content: space-between; /* Distribute space evenly */
+    justify-content: flex-start; /* Changed to flex-start*/
 }
 
 .bottom-section-container > section {
-    flex: 1; /* Allow sections to grow and fill available space */
-    /* Removed padding and border from here, as they are already defined for all sections */
+    flex: 0 1 auto; /*  Don't grow, shrink if needed, auto width */
     margin-bottom: 0; /* Remove the default margin-bottom to avoid extra spacing */
 
 }
