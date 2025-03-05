@@ -110,13 +110,12 @@ section {
     text-decoration: line-through;
 }
 
-
 .artist-details {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-grow: 1;
-    width: 300px;
+    flex: 1; /*  Take up available space */
+    /* width: 300px;  REMOVE THIS */
 
 }
 
@@ -277,7 +276,7 @@ section {
     cursor: pointer;
     background-color: #fff;
     border-bottom: 1px solid #d4d4d4;
-    width: 100%;   /* Ensure full width */
+    width: 100%;    /* Ensure full width */
     height: auto;
     display: block;
 }
@@ -293,13 +292,36 @@ section {
 
 /* Styles for the two-column layout */
 .bottom-section-container {
-    display: flex;        /* Enable Flexbox */
+    display: flex;          /* Enable Flexbox */
     flex-direction: row;  /* Arrange children side-by-side */
-    gap: 20px;           /* Add some space between the columns */
+    gap: 20px;            /* Add some space between the columns */
     justify-content: flex-start; /* Left-align the columns */
 }
 
 .bottom-section-container > section {
     flex: 0 1 auto; /*  Don't grow, shrink if needed, auto width */
     margin-bottom: 0; /* Remove the default margin-bottom */
+}
+
+/* Styles for the move buttons */
+.move-buttons-container {
+  display: flex;
+  flex-direction: row; /* Stack buttons horizontally */
+  align-items: center;
+  margin-right: 10px; /* Add some space between buttons and name input */
+}
+
+.move-artist-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+    margin: 2px;
+    cursor: pointer;
+    font-size: 12px; /* Smaller font size */
+    line-height: 1;  /* Ensure arrows are centered */
+    margin-right: 5px; /* Add space to the RIGHT of the arrows */
+}
+
+.move-artist-btn:hover {
+    background-color: #ddd;
 }

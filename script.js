@@ -205,7 +205,7 @@ function updateDisplay() {
 
     if (state.currentArtistIndex !== -1) {
         const currentArtist = state.artists[state.currentArtistIndex];
-        currentArtistNameDisplay.textContent = `${currentArtist.name} (${currentArtist.shots})`; // CORRECTED LINE
+        currentArtistNameDisplay.textContent = currentArtist.name + " (" + currentArtist.shots + ")"; // FIXED LINE
         const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
         currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
 
@@ -229,88 +229,124 @@ function updateDisplay() {
         const parts = timeStr.split(':');
         return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     }
-    function renderArtistList() {
-        artistAgendaList.innerHTML = ''; // Clear existing content
+function renderArtistList() {
+    artistAgendaList.innerHTML = ''; // Clear existing content
 
-        state.artists.forEach((artist, index) => {
-            const listItem = document.createElement('li');
-            listItem.dataset.id = artist.id;
+    state.artists.forEach((artist, index) => {
+        const listItem = document.createElement('li');
+        listItem.dataset.id = artist.id;
 
-            if (index === state.currentArtistIndex && state.sessionStartTime) {
-                listItem.classList.add('active-artist');
+        if (index === state.currentArtistIndex && state.sessionStartTime) {
+            listItem.classList.add('active-artist');
+        }
+        if (artist.completed) {
+            listItem.classList.add('completed-artist');
+        }
+
+        // --- Move Buttons Container ---  NEW (Moved)
+        const moveButtonsContainer = document.createElement('div');
+        moveButtonsContainer.className = 'move-buttons-container';
+
+        // --- Up Button ---
+        const upBtn = document.createElement('button');
+        upBtn.className = 'move-artist-btn';
+        upBtn.textContent = '↑';
+        upBtn.dataset.direction = 'up';
+        upBtn.dataset.artistId = artist.id;
+        moveButtonsContainer.appendChild(upBtn);
+
+        // --- Down Button ---
+        const downBtn = document.createElement('button');
+        downBtn.className = 'move-artist-btn';
+        downBtn.textContent = '↓';
+        downBtn.dataset.direction = 'down';
+        downBtn.dataset.artistId = artist.id;
+        moveButtonsContainer.appendChild(downBtn);
+
+
+        // --- Artist Details Div ---
+        const artistDetailsDiv = document.createElement('div');
+        artistDetailsDiv.className = 'artist-details';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'artist-name-input';
+        nameInput.value = artist.name;
+        nameInput.placeholder = 'Artist Name';
+        artistDetailsDiv.appendChild(nameInput);
+
+
+        // --- Shots Div ---
+        const shotsDiv = document.createElement('div');
+
+        const shotsLabel = document.createElement('label');
+        shotsLabel.textContent = 'Shots:';
+        shotsDiv.appendChild(shotsLabel);
+
+        const shotsInput = document.createElement('input');
+        shotsInput.type = 'number';
+        shotsInput.className = 'artist-shots-input';
+        shotsInput.value = artist.shots;
+        shotsInput.min = '1';
+        shotsDiv.appendChild(shotsInput);
+
+        // --- Estimated Time Span ---
+        const estimatedTimeSpan = document.createElement('span');
+        estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
+        estimatedTimeSpan.textContent = artist.estimatedTime;
+
+
+
+        // --- Delete Button ---
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-artist-btn';
+        deleteBtn.textContent = 'Delete';
+
+        // --- Assemble List Item --- (Order changed!)
+        listItem.appendChild(moveButtonsContainer); // Move buttons FIRST
+        listItem.appendChild(artistDetailsDiv);     // Then artist details
+        listItem.appendChild(shotsDiv);
+        listItem.appendChild(estimatedTimeSpan);
+        listItem.appendChild(deleteBtn);
+
+
+        // --- Event Listeners --- (No changes here, but included for completeness)
+        shotsInput.addEventListener('change', (event) => {
+            artist.shots = parseInt(event.target.value, 10);
+            if (isNaN(artist.shots) || artist.shots < 1) {
+                artist.shots = 1;
+                shotsInput.value = 1;
             }
-            if (artist.completed) {
-                listItem.classList.add('completed-artist');
-            }
-
-            // --- Artist Details Div ---
-            const artistDetailsDiv = document.createElement('div');
-            artistDetailsDiv.className = 'artist-details';
-
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.className = 'artist-name-input';
-            nameInput.value = artist.name;
-            nameInput.placeholder = 'Artist Name';
-            artistDetailsDiv.appendChild(nameInput);
-
-            // --- Shots Div ---
-            const shotsDiv = document.createElement('div');
-
-            const shotsLabel = document.createElement('label');
-            shotsLabel.textContent = 'Shots:';
-            shotsDiv.appendChild(shotsLabel);
-
-            const shotsInput = document.createElement('input');
-            shotsInput.type = 'number';
-            shotsInput.className = 'artist-shots-input';
-            shotsInput.value = artist.shots;
-            shotsInput.min = '1';
-            shotsDiv.appendChild(shotsInput);
-
-            // --- Estimated Time Span ---
-            const estimatedTimeSpan = document.createElement('span');
-            estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
-            estimatedTimeSpan.textContent = artist.estimatedTime;
-
-            // --- Delete Button ---
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-artist-btn';
-            deleteBtn.textContent = 'Delete';
-
-            // --- Assemble List Item ---
-            listItem.appendChild(artistDetailsDiv);
-            listItem.appendChild(shotsDiv);
-            listItem.appendChild(estimatedTimeSpan);
-            listItem.appendChild(deleteBtn);
-
-            // --- Event Listeners ---
-            shotsInput.addEventListener('change', (event) => {
-                artist.shots = parseInt(event.target.value, 10);
-                if (isNaN(artist.shots) || artist.shots < 1) {
-                    artist.shots = 1;
-                    shotsInput.value = 1;
-                }
-                calculateEstimatedTimePerArtist();
-                updateDisplay();
-            });
-
-            nameInput.addEventListener('change', (event) => {
-                artist.name = event.target.value;
-                updateDisplay();
-            });
-
-            deleteBtn.addEventListener('click', () => {
-                deleteArtist(artist.id);
-            });
-
-            // --- Add to List ---
-            artistAgendaList.appendChild(listItem);
-
-            // --- Autocomplete ---
-            autocomplete(nameInput, users);
+            calculateEstimatedTimePerArtist();
+            updateDisplay();
         });
-    }
+
+        nameInput.addEventListener('change', (event) => {
+            artist.name = event.target.value;
+            updateDisplay();
+        });
+
+        deleteBtn.addEventListener('click', () => {
+            deleteArtist(artist.id);
+        });
+
+        upBtn.addEventListener('click', (event) => {
+            const artistId = parseInt(event.target.dataset.artistId, 10);
+            moveArtist(artistId, 'up');
+        });
+
+        downBtn.addEventListener('click', (event) => {
+            const artistId = parseInt(event.target.dataset.artistId, 10);
+            moveArtist(artistId, 'down');
+        });
+
+        // --- Add to List ---
+        artistAgendaList.appendChild(listItem);
+
+        // --- Autocomplete ---
+        autocomplete(nameInput, users);
+    });
+}
 
     function initializeArtists() {
         const numArtists = parseInt(totalArtistsInput.value, 10);
@@ -388,8 +424,7 @@ function updateDisplay() {
         }
         updateDisplay();
     }
-
-    function addArtist() {
+function addArtist() {
         const newArtist = {
             id: Date.now(),
             name: `Artist ${state.artists.length + 1}`,
@@ -444,6 +479,42 @@ function updateDisplay() {
             state.sessionStartTime = Date.now();
             startSessionTimer();
         }
+        updateDisplay();
+    }
+
+    // --- Move Artist Function ---  NEW and CRUCIAL
+    function moveArtist(artistId, direction) {
+        const currentIndex = state.artists.findIndex(artist => artist.id === artistId);
+        if (currentIndex === -1) return;
+
+        let newIndex;
+        if (direction === 'up') {
+            newIndex = Math.max(0, currentIndex - 1);
+        } else if (direction === 'down') {
+            newIndex = Math.min(state.artists.length - 1, currentIndex + 1);
+        } else {
+            return; // Invalid direction
+        }
+
+        if (newIndex === currentIndex) return; // No move needed
+
+        // Move the artist in the array
+        const [movedArtist] = state.artists.splice(currentIndex, 1);
+        state.artists.splice(newIndex, 0, movedArtist);
+
+        // Update currentArtistIndex if necessary
+        if (state.currentArtistIndex === currentIndex) {
+            state.currentArtistIndex = newIndex;
+        } else if (state.currentArtistIndex === newIndex) {
+          state.currentArtistIndex = currentIndex;
+        }
+        else if (currentIndex < state.currentArtistIndex && newIndex >= state.currentArtistIndex) {
+            state.currentArtistIndex--;
+        } else if (currentIndex > state.currentArtistIndex && newIndex <= state.currentArtistIndex) {
+            state.currentArtistIndex++;
+        }
+
+        renderArtistList();
         updateDisplay();
     }
 
