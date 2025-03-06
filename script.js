@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Element References (grouped together) ---
     const totalArtistsInput = document.getElementById('total-artists');
-    const totalTimeInput = document.getElementById('total-time');
+    const startTimeInput = document.getElementById('start-time');
+    const endTimeInput = document.getElementById('end-time');
     const artistAgendaList = document.getElementById('artist-agenda-list');
     const startReviewBtn = document.getElementById('start-review-btn');
     const nextArtistBtn = document.getElementById('next-artist-btn');
     const addArtistBtn = document.getElementById('add-artist-btn');
-    const addTimeBtn = document.getElementById('add-time-btn');
-    const addTimeInput = document.getElementById('add-time-input');
+    const setCurrentTimeBtn = document.getElementById('set-current-time-btn'); // Get the new button
 
     const totalShotsDisplay = document.getElementById('total-shots-display');
     const totalTimeRemainingDisplay = document.getElementById('total-time-remaining-display');
@@ -17,9 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentArtistTimeElapsedDisplay = document.getElementById('current-artist-time-elapsed');
     const currentArtistEstTimeRemDisplay = document.getElementById('current-artist-est-time-rem');
 
+    // --- State ---
     let state = {
         artists: [],
-        totalTimeAllotment: parseInt(totalTimeInput.value, 10) * 60,
+        startTime: startTimeInput.value,  // Store start time as string HH:mm
+        endTime: endTimeInput.value,      // Store end time as string HH:mm
+        totalTimeAllotment: calculateTotalTimeAllotment(startTimeInput.value, endTimeInput.value), // Initial calculation
         sessionStartTime: null,
         currentArtistStartTime: null,
         currentArtistIndex: -1,
@@ -28,13 +32,113 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStarted: false,
     };
 
+    // Sortable instance.  Needs to be accessible to multiple functions.
+    let sortableInstance = null;
+
+    // --- User Data (remains unchanged) ---
     const users = [
+        { username: "nedyacet", firstName: "Nedy", lastName: "Acet" },
+        { username: "pauliea", firstName: "Paulie", lastName: "Alam" },
+        { username: "eanderson", firstName: "Eric", lastName: "Anderson" },
+        { username: "landrus", firstName: "Lindsay", lastName: "Andrus" },
+        { username: "joebackcheck", firstName: "Brendan", lastName: "Beesley" },
+        { username: "mikeyb", firstName: "Michael", lastName: "Bidinger" },
+        { username: "mariab", firstName: "Maria", lastName: "Bjarnadottir" },
+        { username: "sequoia", firstName: "Sequoia", lastName: "Blankenship" },
+        { username: "ebonifacio", firstName: "Evan", lastName: "Bonifacio" },
+        { username: "earl", firstName: "Earl", lastName: "Brawley" },
+        { username: "donaldbrooks", firstName: "Donald", lastName: "Brooks" },
+        { username: "jimbrown", firstName: "James", lastName: "Brown" },
+        { username: "hcastillo", firstName: "Heaven", lastName: "Castillo" },
+        { username: "jackshaocheng", firstName: "Jack", lastName: "Cheng" },
+        { username: "cchua", firstName: "Chris", lastName: "Chua" },
+        { username: "chunchiu", firstName: "John Chun Chiu", lastName: "Lee" },  //Special case handling
+        { username: "coderre", firstName: "Brett", lastName: "Coderre" },
+        { username: "bethdavid", firstName: "Beth", lastName: "David" },
+        { username: "ydekker", firstName: "Youri", lastName: "Dekker" },
+        { username: "rdenovan", firstName: "Robb", lastName: "Denovan" },
+        { username: "brentd", firstName: "Brent", lastName: "Dienst" },
+        { username: "adutz", firstName: "Andreas", lastName: "Dutz" },
+        { username: "efazio", firstName: "Elena", lastName: "Fazio" },
+        { username: "tacocat", firstName: "Robb", lastName: "Gibbs" },
+        { username: "camryngray", firstName: "Camryn", lastName: "Gray" },
+        { username: "jgustovich", firstName: "Jordan", lastName: "Gustovich" },
+        { username: "ahatfield", firstName: "Aron", lastName: "Hatfield" },
+        { username: "chaynes", firstName: "Christopher", lastName: "Haynes" },
+        { username: "thsieh", firstName: "Trevor", lastName: "Hsieh" },
+        { username: "dkane", firstName: "Dallas", lastName: "Kane" },
+        { username: "irmak", firstName: "Irmak", lastName: "Karasinir" },
+        { username: "kkim", firstName: "Ken", lastName: "Kim" },
+        { username: "krause", firstName: "Shawn", lastName: "Krause" },
+        { username: "krug", firstName: "Steve", lastName: "Krug" },
+        { username: "bruce", firstName: "Bruce", lastName: "Kuei" },
+        { username: "jlazare", firstName: "Jeremy", lastName: "Lazare" },
+        { username: "wendell", firstName: "Wendell", lastName: "Lee" },
+        { username: "holger", firstName: "Holger", lastName: "Leihe" },
+        { username: "lluisllobera", firstName: "Lluis", lastName: "Llobera" },
+        { username: "codyosaurus", firstName: "Cody", lastName: "Lyon" },
+        { username: "mmajers", firstName: "Matt", lastName: "Majers" },
+        { username: "amano", firstName: "Aviv", lastName: "Mano" },
+        { username: "amcgriff", firstName: "Aaron", lastName: "McGriff" },
+        { username: "chloemerwin", firstName: "Chloe", lastName: "Merwin" },
+        { username: "jlmigita", firstName: "Jennifer", lastName: "Migita" },
+        { username: "cameron", firstName: "Cameron", lastName: "Miyasaki" },
+        { username: "bruna", firstName: "Bruna", lastName: "Moniz Berford" },
+        { username: "shaunzye", firstName: "Sean", lastName: "Muriithi" },
+        { username: "jcnavarro", firstName: "Juan Carlos", lastName: "Navarro-Carrion" }, //Special Case
+        { username: "victor", firstName: "Victor", lastName: "Navone" },
+        { username: "dnguyen", firstName: "Dan", lastName: "Nguyen" },
+        { username: "eokba", firstName: "Eddy", lastName: "Okba" },
+        { username: "jordi", firstName: "Jordi", lastName: "Onate Isal" },
+        { username: "davidspeng", firstName: "David", lastName: "S Peng" },//Special case
+        { username: "tpixton", firstName: "Tim", lastName: "Pixton" },
+        { username: "bobby", firstName: "Bobby", lastName: "Podesta" },
+        { username: "dpoznansky", firstName: "Deborah", lastName: "Poznansky" },
+        { username: "jayson", firstName: "Jayson", lastName: "Price" },
+        { username: "theresafreyes", firstName: "Theresa", lastName: "Reyes" },
+        { username: "mrivera", firstName: "Mark", lastName: "Rivera" },
+        { username: "arodriguez", firstName: "Adam", lastName: "Rodriguez" },
+        { username: "jaime", firstName: "Jaime", lastName: "Roe" },
+        { username: "montaque", firstName: "MontaQue", lastName: "Ruffin" },
+        { username: "russ", firstName: "Robert", lastName: "Russ" },
+        { username: "arutland", firstName: "Allison", lastName: "Rutland" },
+        { username: "jryan", firstName: "Jamie", lastName: "Ryan" },
+        { username: "gini", firstName: "Gini", lastName: "Santos" },
         { username: "msauls", firstName: "Mike", lastName: "Sauls" },
-        { username: "sdoe", firstName: "Steve", lastName: "Doe" },
-        { username: "bsagget", firstName: "Bob", lastName: "Sagget" },
-        { username: "psauls", firstName: "Penny", lastName: "Sauls" }
+        { username: "sschumacher", firstName: "Stefan", lastName: "Schumacher" },
+        { username: "ascott", firstName: "Anna", lastName: "Scott" },
+        { username: "eserenko", firstName: "Elena", lastName: "Serenko" },
+        { username: "ross", firstName: "Ross", lastName: "Stevenson" },
+        { username: "mstocker", firstName: "Michael", lastName: "Stocker" },
+        { username: "tstorhoff", firstName: "Teresa", lastName: "Storhoff" },
+        { username: "bensu", firstName: "Benjamin", lastName: "Su" },
+        { username: "rsuter", firstName: "Raphael", lastName: "Suter" },
+        { username: "latanimoto", firstName: "Laura", lastName: "Aika Tanimoto" }, //Special Case
+        { username: "rthompson", firstName: "Rob", lastName: "Thompson" },
+        { username: "btower", firstName: "Becki", lastName: "Tower" },
+        { username: "laclaude", firstName: "Jean-Claude", lastName: "Tran" },//Special Case
+        { username: "luribe", firstName: "Luis", lastName: "Uribe" },
+        { username: "kristoph", firstName: "Kristophe", lastName: "Vergne" },
+        { username: "thewallrus", firstName: "Nathan", lastName: "Wall" },
+        { username: "rwesley", firstName: "Royce", lastName: "Wesley" },
+        { username: "liv", firstName: "Olivia", lastName: "Whitaker" },
+        { username: "rwight", firstName: "Ricky", lastName: "Wight" },
+        { username: "awinterstein", firstName: "Alon", lastName: "Winterstein" },
+        { username: "kureha", firstName: "Kureha", lastName: "Yokoo" },
+        { username: "jyuster", firstName: "Jack", lastName: "Yuster" },
+        { username: "tzach", firstName: "Tom", lastName: "Zach" },
     ];
 
+    // Sort the array: first by firstName, then by lastName, and finally by username
+    users.sort((a, b) => {
+        if (a.firstName < b.firstName) return -1;
+        if (a.firstName > b.firstName) return 1;
+        if (a.lastName < b.lastName) return -1;
+        if (a.lastName > b.lastName) return 1;
+        if (a.username < b.username) return -1;
+        if (a.username > b.username) return 1;
+        return 0;
+    });
     // --- Autocomplete Function ---
     function autocomplete(inp, arr) {
         let currentFocus;
@@ -76,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         closeAllLists();
                     });
 
-                    // --- Prevent mousedown from closing lists prematurely ---
+                    // Prevent mousedown from closing lists prematurely
                     b.addEventListener("mousedown", function(e) {
                         e.stopPropagation();
                     });
@@ -89,26 +193,27 @@ document.addEventListener('DOMContentLoaded', () => {
         inp.addEventListener("keydown", function(e) {
             let x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
-            if (e.keyCode == 40) {
+            if (e.keyCode == 40) { // Down arrow
                 currentFocus++;
                 addActive(x);
-            } else if (e.keyCode == 38) {
+            } else if (e.keyCode == 38) { // Up arrow
                 currentFocus--;
                 addActive(x);
-            } else if (e.keyCode == 13) {
+            } else if (e.keyCode == 13) { // Enter key
                 e.preventDefault();
                 if (currentFocus > -1) {
                     if (x) x[currentFocus].click();
                 } else {
+                    // If no suggestion is selected, use the first suggestion, or the current input
                     let firstSuggestion = x && x[0] ? x[0].getElementsByTagName("input")[0].value : null;
                     if (firstSuggestion) {
-                        inp.value = firstSuggestion;
-                        const artistId = parseInt(inp.closest('li').dataset.id, 10);
-                        const artist = state.artists.find(a => a.id === artistId);
-                        if (artist) {
-                            artist.name = inp.value;
-                            updateDisplay();
-                        }
+                         inp.value = firstSuggestion;
+                         const artistId = parseInt(inp.closest('li').dataset.id, 10);
+                         const artist = state.artists.find(a => a.id === artistId);
+                         if(artist) {
+                             artist.name = inp.value;
+                             updateDisplay();
+                         }
                     } else {
                         const artistId = parseInt(inp.closest('li').dataset.id, 10);
                         const artist = state.artists.find(a => a.id === artistId);
@@ -150,10 +255,11 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAllLists(e.target);
     });
 
+    // Format time in MM:SS
     function formatTime(seconds) {
         const minutes = Math.floor(Math.abs(seconds) / 60);
         const secs = Math.floor(Math.abs(seconds) % 60);
-        const sign = seconds < 0 ? '-' : '';
+        const sign = seconds < 0 ? '-' : ''; // Handle negative times
         return sign + String(minutes).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
     }
 
@@ -168,6 +274,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateTotalPeopleRemaining() {
         return state.artists.reduce((sum, artist) => artist.completed ? sum : sum + 1, 0);
     }
+
+    // Calculate total time allotment based on start and end times
+    function calculateTotalTimeAllotment(startTime, endTime) {
+        const [startHours, startMinutes] = startTime.split(':').map(Number);
+        const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+        const startDate = new Date();
+        startDate.setHours(startHours, startMinutes, 0, 0);
+
+        const endDate = new Date();
+        endDate.setHours(endHours, endMinutes, 0, 0);
+
+          // Check if end time is earlier than start time (crosses midnight)
+        if (endDate <= startDate) {
+          endDate.setDate(endDate.getDate() + 1); // Add one day to the end date
+         }
+
+        const diffInMilliseconds = endDate - startDate;
+        return Math.max(0, Math.floor(diffInMilliseconds / 1000)); // Return in seconds
+    }
+
 
     function calculateEstimatedTimePerArtist() {
         const totalRemainingShots = calculateTotalShotsRemaining();
@@ -190,164 +317,204 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-function updateDisplay() {
-    const totalShots = calculateTotalShots();
-    const totalShotsRemaining = calculateTotalShotsRemaining();
-    const totalPeopleRemaining = calculateTotalPeopleRemaining();
+    function updateDisplay() {
+        const totalShots = calculateTotalShots();
+        const totalShotsRemaining = calculateTotalShotsRemaining();
+        const totalPeopleRemaining = calculateTotalPeopleRemaining();
 
-    totalShotsDisplay.textContent = totalShots;
-    totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
-    totalShotsRemainingDisplay.textContent = totalShotsRemaining;
-    totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
+        totalShotsDisplay.textContent = totalShots;
+        totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
+        totalShotsRemainingDisplay.textContent = totalShotsRemaining;
+        totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
 
-    calculateEstimatedTimePerArtist();
-    renderArtistList();
+        calculateEstimatedTimePerArtist();
+        renderArtistList();
 
-    if (state.currentArtistIndex !== -1) {
-        const currentArtist = state.artists[state.currentArtistIndex];
-        currentArtistNameDisplay.textContent = currentArtist.name + " (" + currentArtist.shots + ")"; // FIXED LINE
-        const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
-        currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
+        if (state.currentArtistIndex !== -1) {
+            const currentArtist = state.artists[state.currentArtistIndex];
+            currentArtistNameDisplay.textContent = currentArtist.name + " (" + currentArtist.shots + ")";
+            const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
+            currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
 
-        const estimatedTimeInSeconds = timeToSeconds(currentArtist.estimatedTime);
-        const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
-        currentArtistEstTimeRemDisplay.textContent = formatTime(remainingEstTimeForCurrent);
-        if (remainingEstTimeForCurrent < 0) {
-            currentArtistEstTimeRemDisplay.classList.add('negative-time');
+            const estimatedTimeInSeconds = timeToSeconds(currentArtist.estimatedTime);
+            const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
+            currentArtistEstTimeRemDisplay.textContent = formatTime(remainingEstTimeForCurrent);
+            if (remainingEstTimeForCurrent < 0) {
+                currentArtistEstTimeRemDisplay.classList.add('negative-time');
+            } else {
+                currentArtistEstTimeRemDisplay.classList.remove('negative-time');
+            }
         } else {
-            currentArtistEstTimeRemDisplay.classList.remove('negative-time');
+            currentArtistNameDisplay.textContent = '';
+            currentArtistTimeElapsedDisplay.textContent = '00:00';
+            currentArtistEstTimeRemDisplay.textContent = '00:00';
         }
-    } else {
-        currentArtistNameDisplay.textContent = '';
-        currentArtistTimeElapsedDisplay.textContent = '00:00';
-        currentArtistEstTimeRemDisplay.textContent = '00:00';
+
+        // Update Sortable draggability
+        updateSortableDraggability();
+
+        // Disable totalArtistsInput if the session has started
+        totalArtistsInput.disabled = state.sessionStarted;
     }
-}
 
     function timeToSeconds(timeStr) {
         if (timeStr === "Completed") return 0;
         const parts = timeStr.split(':');
         return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     }
-function renderArtistList() {
-    artistAgendaList.innerHTML = ''; // Clear existing content
 
-    state.artists.forEach((artist, index) => {
-        const listItem = document.createElement('li');
-        listItem.dataset.id = artist.id;
+    function renderArtistList() {
+        artistAgendaList.innerHTML = ''; // Clear existing content
 
-        if (index === state.currentArtistIndex && state.sessionStartTime) {
-            listItem.classList.add('active-artist');
-        }
-        if (artist.completed) {
-            listItem.classList.add('completed-artist');
-        }
+        state.artists.forEach((artist, index) => {
+            const listItem = document.createElement('li');
+            listItem.dataset.id = artist.id;
 
-        // --- Move Buttons Container ---  NEW (Moved)
-        const moveButtonsContainer = document.createElement('div');
-        moveButtonsContainer.className = 'move-buttons-container';
-
-        // --- Up Button ---
-        const upBtn = document.createElement('button');
-        upBtn.className = 'move-artist-btn';
-        upBtn.textContent = '↑';
-        upBtn.dataset.direction = 'up';
-        upBtn.dataset.artistId = artist.id;
-        moveButtonsContainer.appendChild(upBtn);
-
-        // --- Down Button ---
-        const downBtn = document.createElement('button');
-        downBtn.className = 'move-artist-btn';
-        downBtn.textContent = '↓';
-        downBtn.dataset.direction = 'down';
-        downBtn.dataset.artistId = artist.id;
-        moveButtonsContainer.appendChild(downBtn);
-
-
-        // --- Artist Details Div ---
-        const artistDetailsDiv = document.createElement('div');
-        artistDetailsDiv.className = 'artist-details';
-
-        const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.className = 'artist-name-input';
-        nameInput.value = artist.name;
-        nameInput.placeholder = 'Artist Name';
-        artistDetailsDiv.appendChild(nameInput);
-
-
-        // --- Shots Div ---
-        const shotsDiv = document.createElement('div');
-
-        const shotsLabel = document.createElement('label');
-        shotsLabel.textContent = 'Shots:';
-        shotsDiv.appendChild(shotsLabel);
-
-        const shotsInput = document.createElement('input');
-        shotsInput.type = 'number';
-        shotsInput.className = 'artist-shots-input';
-        shotsInput.value = artist.shots;
-        shotsInput.min = '1';
-        shotsDiv.appendChild(shotsInput);
-
-        // --- Estimated Time Span ---
-        const estimatedTimeSpan = document.createElement('span');
-        estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
-        estimatedTimeSpan.textContent = artist.estimatedTime;
-
-
-
-        // --- Delete Button ---
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-artist-btn';
-        deleteBtn.textContent = 'Delete';
-
-        // --- Assemble List Item --- (Order changed!)
-        listItem.appendChild(moveButtonsContainer); // Move buttons FIRST
-        listItem.appendChild(artistDetailsDiv);     // Then artist details
-        listItem.appendChild(shotsDiv);
-        listItem.appendChild(estimatedTimeSpan);
-        listItem.appendChild(deleteBtn);
-
-
-        // --- Event Listeners --- (No changes here, but included for completeness)
-        shotsInput.addEventListener('change', (event) => {
-            artist.shots = parseInt(event.target.value, 10);
-            if (isNaN(artist.shots) || artist.shots < 1) {
-                artist.shots = 1;
-                shotsInput.value = 1;
+            if (index === state.currentArtistIndex && state.sessionStartTime) {
+                listItem.classList.add('active-artist');
             }
-            calculateEstimatedTimePerArtist();
-            updateDisplay();
+            if (artist.completed) {
+                listItem.classList.add('completed-artist');
+            }
+
+            // --- Move Buttons Container ---
+            const moveButtonsContainer = document.createElement('div');
+            moveButtonsContainer.className = 'move-buttons-container';
+
+            // --- Up Button ---
+            const upBtn = document.createElement('button');
+            upBtn.className = 'move-artist-btn';
+            upBtn.textContent = '↑';
+            upBtn.dataset.direction = 'up';
+            upBtn.dataset.artistId = artist.id;
+            upBtn.tabIndex = -1; // Prevent tabbing to move buttons
+            moveButtonsContainer.appendChild(upBtn);
+
+            // --- Down Button ---
+            const downBtn = document.createElement('button');
+            downBtn.className = 'move-artist-btn';
+            downBtn.textContent = '↓';
+            downBtn.dataset.direction = 'down';
+            downBtn.dataset.artistId = artist.id;
+            downBtn.tabIndex = -1; // Prevent tabbing to move buttons
+            moveButtonsContainer.appendChild(downBtn);
+
+
+            // --- Artist Details Div ---
+            const artistDetailsDiv = document.createElement('div');
+            artistDetailsDiv.className = 'artist-details';
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'artist-name-input';
+            nameInput.placeholder = artist.name;
+            nameInput.value = '';  // Use an empty string for the input value
+            artistDetailsDiv.appendChild(nameInput);
+
+
+            // --- Shots Div ---
+            const shotsDiv = document.createElement('div');
+
+            const shotsLabel = document.createElement('label');
+            shotsLabel.textContent = 'Shots:';
+            shotsDiv.appendChild(shotsLabel);
+
+            const shotsInput = document.createElement('input');
+            shotsInput.type = 'number';
+            shotsInput.className = 'artist-shots-input';
+            shotsInput.value = artist.shots;
+            shotsInput.min = '1';
+            shotsDiv.appendChild(shotsInput);
+
+            // --- Estimated Time Span ---
+            const estimatedTimeSpan = document.createElement('span');
+            estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
+            estimatedTimeSpan.textContent = artist.estimatedTime;
+
+            // --- Delete Button ---
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-artist-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.tabIndex = -1; // Prevent tabbing to the delete button
+
+            // --- Assemble List Item ---
+            listItem.appendChild(moveButtonsContainer);
+            listItem.appendChild(artistDetailsDiv);
+            listItem.appendChild(shotsDiv);
+            listItem.appendChild(estimatedTimeSpan);
+            listItem.appendChild(deleteBtn);
+
+
+            // --- Event Listeners ---
+            shotsInput.addEventListener('change', (event) => {
+                artist.shots = parseInt(event.target.value, 10);
+                if (isNaN(artist.shots) || artist.shots < 1) {
+                    artist.shots = 1;
+                    shotsInput.value = 1;
+                }
+                calculateEstimatedTimePerArtist();
+                updateDisplay();
+            });
+
+            nameInput.addEventListener('change', (event) => {
+                artist.name = event.target.value;
+                updateDisplay();
+            });
+
+            deleteBtn.addEventListener('click', () => {
+                deleteArtist(artist.id);
+            });
+
+            upBtn.addEventListener('click', (event) => {
+                const artistId = parseInt(event.target.dataset.artistId, 10);
+                moveArtist(artistId, 'up');
+            });
+
+            downBtn.addEventListener('click', (event) => {
+                const artistId = parseInt(event.target.dataset.artistId, 10);
+                moveArtist(artistId, 'down');
+            });
+
+            // Combined Tab Key Handling
+            function handleTab(event, inputType, currentIndex) {
+                if (event.key === 'Tab' && !event.shiftKey) {
+                    event.preventDefault();
+
+                    const nextIndex = currentIndex + 1;
+                    if (nextIndex < state.artists.length) {
+                        // Focus on the next input of the SAME type
+                        const nextInput = artistAgendaList.children[nextIndex].querySelector(
+                            inputType === 'name' ? '.artist-name-input' : '.artist-shots-input'
+                        );
+                        if (nextInput) {
+                            nextInput.focus();
+                        }
+                    } else {
+                        // Cycle back to the first input of the SAME type
+                        const firstInput = artistAgendaList.children[0].querySelector(
+                            inputType === 'name' ? '.artist-name-input' : '.artist-shots-input'
+                        );
+                       if (firstInput) {
+                            firstInput.focus();
+                        }
+                    }
+                }
+            }
+
+            nameInput.addEventListener('keydown', (event) => {
+                handleTab(event, 'name', index);
+            });
+
+            shotsInput.addEventListener('keydown', (event) => {
+                handleTab(event, 'shots', index);
+            });
+            // --- Add to List ---
+            artistAgendaList.appendChild(listItem);
+
+            // --- Autocomplete ---
+            autocomplete(nameInput, users);
         });
-
-        nameInput.addEventListener('change', (event) => {
-            artist.name = event.target.value;
-            updateDisplay();
-        });
-
-        deleteBtn.addEventListener('click', () => {
-            deleteArtist(artist.id);
-        });
-
-        upBtn.addEventListener('click', (event) => {
-            const artistId = parseInt(event.target.dataset.artistId, 10);
-            moveArtist(artistId, 'up');
-        });
-
-        downBtn.addEventListener('click', (event) => {
-            const artistId = parseInt(event.target.dataset.artistId, 10);
-            moveArtist(artistId, 'down');
-        });
-
-        // --- Add to List ---
-        artistAgendaList.appendChild(listItem);
-
-        // --- Autocomplete ---
-        autocomplete(nameInput, users);
-    });
-}
-
+    }
     function initializeArtists() {
         const numArtists = parseInt(totalArtistsInput.value, 10);
         state.artists = Array.from({ length: numArtists }, (_, i) => ({
@@ -357,6 +524,8 @@ function renderArtistList() {
             estimatedTime: "00:00",
             completed: false
         }));
+        // Calculate total time allotment and update state
+        state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
         state.totalTimeRemaining = state.totalTimeAllotment;
         renderArtistList();
         updateDisplay();
@@ -394,6 +563,7 @@ function renderArtistList() {
 
         state.sessionStarted = true;
         state.currentArtistIndex = 0;
+        // Use the pre-calculated totalTimeAllotment
         state.totalTimeRemaining = state.totalTimeAllotment;
 
         startSessionTimer();
@@ -403,6 +573,9 @@ function renderArtistList() {
 
         startReviewBtn.disabled = true;
         startReviewBtn.style.cursor = "default";
+
+        // Update Sortable draggability
+        updateSortableDraggability();
     }
 
     function nextArtist() {
@@ -422,9 +595,10 @@ function renderArtistList() {
             clearInterval(state.timerInterval);
             alert("Review session completed for all artists!");
         }
-        updateDisplay();
+        updateDisplay(); // Includes updateSortableDraggability()
     }
-function addArtist() {
+
+    function addArtist() {
         const newArtist = {
             id: Date.now(),
             name: `Artist ${state.artists.length + 1}`,
@@ -435,6 +609,7 @@ function addArtist() {
         state.artists.push(newArtist);
         renderArtistList();
         updateDisplay();
+
     }
 
     function deleteArtist(artistId) {
@@ -466,23 +641,7 @@ function addArtist() {
         updateDisplay();
     }
 
-    function addSessionTime() {
-        const timeToAddMinutes = parseInt(addTimeInput.value, 10);
-        if (isNaN(timeToAddMinutes) || timeToAddMinutes < 1) {
-            alert("Please enter a valid time to add.");
-            return;
-        }
-        state.totalTimeAllotment += timeToAddMinutes * 60;
-        state.totalTimeRemaining += timeToAddMinutes * 60;
-
-        if (!state.sessionStartTime) {
-            state.sessionStartTime = Date.now();
-            startSessionTimer();
-        }
-        updateDisplay();
-    }
-
-    // --- Move Artist Function ---  NEW and CRUCIAL
+    // Move Artist Function
     function moveArtist(artistId, direction) {
         const currentIndex = state.artists.findIndex(artist => artist.id === artistId);
         if (currentIndex === -1) return;
@@ -498,6 +657,15 @@ function addArtist() {
 
         if (newIndex === currentIndex) return; // No move needed
 
+        // Prevent moving above current artist during session
+        if (state.sessionStarted && state.currentArtistIndex !== -1) {
+            if (direction === 'up' && newIndex <= state.currentArtistIndex) {
+                //Attempt to move to a position *before or at* the current.
+                return; //Prevent the change.
+            }
+        }
+
+
         // Move the artist in the array
         const [movedArtist] = state.artists.splice(currentIndex, 1);
         state.artists.splice(newIndex, 0, movedArtist);
@@ -507,8 +675,7 @@ function addArtist() {
             state.currentArtistIndex = newIndex;
         } else if (state.currentArtistIndex === newIndex) {
           state.currentArtistIndex = currentIndex;
-        }
-        else if (currentIndex < state.currentArtistIndex && newIndex >= state.currentArtistIndex) {
+        } else if (currentIndex < state.currentArtistIndex && newIndex >= state.currentArtistIndex) {
             state.currentArtistIndex--;
         } else if (currentIndex > state.currentArtistIndex && newIndex <= state.currentArtistIndex) {
             state.currentArtistIndex++;
@@ -518,19 +685,82 @@ function addArtist() {
         updateDisplay();
     }
 
+
+    // Update Sortable Draggability
+    function updateSortableDraggability() {
+        if (sortableInstance) {
+          if (state.sessionStarted && state.currentArtistIndex !== -1) {
+                sortableInstance.option('group', {
+                    name: 'artists',
+                    pull: true,
+                    put: (to) => {
+                        // Prevent putting before the current artist.
+                        return to.el.children.length <= state.currentArtistIndex;
+                    }
+                });
+             // Loop through to set individual draggability
+             for (let i = 0; i < artistAgendaList.children.length; i++){
+               const listItem = artistAgendaList.children[i];
+               if (i <= state.currentArtistIndex) {
+                 sortableInstance.option('draggable', '.disabled-sortable'); // No elements draggable
+               } else {
+                  sortableInstance.option('draggable', 'li'); // Reset to normal
+               }
+             }
+
+          } else {
+             // If session not started, allow all dragging.
+             sortableInstance.option('group', { name: 'artists', pull: true, put: true });
+             sortableInstance.option('draggable', 'li');
+          }
+        }
+    }
+
+    // --- Event Listeners ---
     totalArtistsInput.addEventListener('change', initializeArtists);
-    totalTimeInput.addEventListener('change', () => {
-        state.totalTimeAllotment = parseInt(totalTimeInput.value, 10) * 60;
+
+    startTimeInput.addEventListener('change', () => {
+      state.startTime = startTimeInput.value;
+      state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
+      state.totalTimeRemaining = state.totalTimeAllotment;
+      updateDisplay();
+    });
+
+    endTimeInput.addEventListener('change', () => {
+      state.endTime = endTimeInput.value;
+      state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
+      state.totalTimeRemaining = state.totalTimeAllotment;
+      updateDisplay();
+    });
+
+
+    // Event listener for the "Set Current Time" button
+    setCurrentTimeBtn.addEventListener('click', () => {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}`;
+
+        startTimeInput.value = currentTime;
+        state.startTime = currentTime;  // Update the state as well!
+        state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
         state.totalTimeRemaining = state.totalTimeAllotment;
         updateDisplay();
     });
+
+
     startReviewBtn.addEventListener('click', startReviewSession);
     nextArtistBtn.addEventListener('click', nextArtist);
     addArtistBtn.addEventListener('click', addArtist);
-    addTimeBtn.addEventListener('click', addSessionTime);
 
-    Sortable.create(artistAgendaList, {
-        draggable: 'li',
+    // Initialize Sortable
+    sortableInstance = Sortable.create(artistAgendaList, {
+        draggable: 'li', // Default to all list items being draggable.
+        group: {
+            name: 'artists',
+            pull: true,
+            put: true,
+        },
         onUpdate: function (evt) {
             const oldIndex = evt.oldIndex;
             const newIndex = evt.newIndex;
@@ -547,11 +777,11 @@ function addArtist() {
                     state.currentArtistIndex++;
                 }
                 renderArtistList();
-                updateDisplay();
+                updateDisplay(); // Includes updateSortableDraggability
             }
         },
     });
 
     initializeArtists();
-    updateDisplay();
-}); //End of DOMContentLoaded
+    updateDisplay(); // Initial display update
+});

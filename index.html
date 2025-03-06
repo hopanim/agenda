@@ -19,9 +19,13 @@
                     <input type="number" id="total-artists" value="5" min="1">
                 </div>
                 <div class="input-group">
-                    <label for="total-time">Total Review Time (minutes):</label>
-                    <input type="number" id="total-time" value="60" min="1">
+                    <label for="start-time">Start Time:</label>
+                    <input type="time" id="start-time" value="09:00" step="900">
+                    <button type="button" id="set-current-time-btn" title="Set to Current Time">Now</button>
                 </div>
+                <div class="input-group">
+                    <label for="end-time">End Time:</label>
+                    <input type="time" id="end-time" value="10:00" step="900">    </div>
             </section>
 
             <section id="agenda-management-section">
@@ -30,9 +34,7 @@
                 </ul>
                 <div class="agenda-actions">
                     <button id="add-artist-btn">Add Artist</button>
-                    <button id="add-time-btn">Add Session Time (min)</button>
-                    <input type="number" id="add-time-input" value="5" min="1" style="width: 60px;">
-                </div>
+                    </div>
             </section>
 
             <section id="session-control-section">

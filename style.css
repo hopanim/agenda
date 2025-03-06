@@ -27,8 +27,7 @@ section {
 }
 
 .top-sections-wrapper {
-    max-width: 500px; /* Adjust as needed */
-    /* Removed margin: 0 auto;  Left-align now */
+    max-width: 500px;
 }
 
 .input-group {
@@ -48,13 +47,20 @@ section {
     width: 100px;
 }
 
-/* Style for the artist input */
 .input-group input[type="text"] {
     padding: 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
     width: 200px;
 }
+
+.input-group input[type="time"] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 110px;
+}
+
 
 #artist-agenda-list {
     list-style: none;
@@ -70,8 +76,14 @@ section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: grab;
+    cursor: grab; /* Change cursor on hover */
     position: relative;
+    transition: box-shadow 0.2s ease; /* Add transition for box-shadow */
+}
+
+/* Active drag cursor */
+#artist-agenda-list li:active {
+    cursor: grabbing;
 }
 
 /* Visual distinction for rows */
@@ -85,7 +97,7 @@ section {
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 4px;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, background-color 0.2s ease; /* Smooth transition */
     z-index: -1;
 }
 
@@ -93,10 +105,17 @@ section {
     background-color: rgba(0, 0, 128, 0.05);
 }
 
-/* Show overlay on hover and drag */
-#artist-agenda-list li:hover::before,
-    #artist-agenda-list.sortable-drag li::before {
+/* Show overlay on hover and drag - Increased intensity */
+#artist-agenda-list li:hover::before {
     opacity: 1;
+    background-color: rgba(0, 0, 0, 0.04); /* Darker on hover */
+}
+#artist-agenda-list.sortable-drag li::before{
+    opacity: 1;
+}
+/*Increased intensity*/
+#artist-agenda-list li:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* More pronounced box-shadow */
 }
 
 #artist-agenda-list li.active-artist {
@@ -114,9 +133,7 @@ section {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 1; /*  Take up available space */
-    /* width: 300px;  REMOVE THIS */
-
+    flex: 1;
 }
 
 .artist-details input[type="text"] {
@@ -136,7 +153,7 @@ section {
     margin-left: auto;
     font-style: italic;
     color: #777;
-    margin-right: 10px;
+    margin-right: auto;
 }
 
 .estimated-time.negative-time {
@@ -154,8 +171,7 @@ section {
     margin-right: 5px;
 }
 
-#add-artist-btn,
-#add-time-btn {
+#add-artist-btn {
     background-color: #008CBA;
 }
 
@@ -202,9 +218,9 @@ section {
 .summary-label {
     font-weight: bold;
     margin-right: 5px;
-    display: inline-block; /* Important for consistent width */
-    width: 100px;          /* Adjust as needed */
-    text-align: right;    /* Right-align the text */
+    display: inline-block;
+    width: 100px;
+    text-align: right;
 }
 
 #artist-agenda-list.sortable-ghost {
@@ -249,9 +265,9 @@ section {
 }
 
 #session-control-section .big-button:disabled {
-  background-color: #ccc;
-  cursor: default;
-  box-shadow: none;
+background-color: #ccc;
+cursor: default;
+box-shadow: none;
 }
 
 .autocomplete {
@@ -270,13 +286,13 @@ section {
     right: 0;
     top: 100%;
 }
-/* --- KEY CHANGE: Remove padding from container, add to inner div --- */
+
 .autocomplete-items div {
-    padding: 10px; /* Padding moved here */
+    padding: 10px;
     cursor: pointer;
     background-color: #fff;
     border-bottom: 1px solid #d4d4d4;
-    width: 100%;    /* Ensure full width */
+    width: 100%;
     height: auto;
     display: block;
 }
@@ -292,23 +308,23 @@ section {
 
 /* Styles for the two-column layout */
 .bottom-section-container {
-    display: flex;          /* Enable Flexbox */
+    display: flex;         /* Enable Flexbox */
     flex-direction: row;  /* Arrange children side-by-side */
     gap: 20px;            /* Add some space between the columns */
     justify-content: flex-start; /* Left-align the columns */
 }
 
 .bottom-section-container > section {
-    flex: 0 1 auto; /*  Don't grow, shrink if needed, auto width */
-    margin-bottom: 0; /* Remove the default margin-bottom */
+    flex: 0 1 auto;       /*  Don't grow, shrink if needed, auto width */
+    margin-bottom: 0;     /* Remove the default margin-bottom */
 }
 
 /* Styles for the move buttons */
 .move-buttons-container {
-  display: flex;
-  flex-direction: row; /* Stack buttons horizontally */
-  align-items: center;
-  margin-right: 10px; /* Add some space between buttons and name input */
+display: flex;
+flex-direction: row; /* Stack buttons horizontally */
+align-items: center;
+margin-right: 10px; /* Add some space between buttons and name input */
 }
 
 .move-artist-btn {
@@ -317,11 +333,55 @@ section {
     padding: 2px 5px;
     margin: 2px;
     cursor: pointer;
-    font-size: 12px; /* Smaller font size */
-    line-height: 1;  /* Ensure arrows are centered */
-    margin-right: 5px; /* Add space to the RIGHT of the arrows */
+    font-size: 12px;
+    line-height: 1;
+    margin-right: 5px;
+    /* Remove default text content */
+    text-indent: -9999px;
+    overflow: hidden;
+    width: 16px; /* Set explicit width/height */
+    height: 16px;
+    display: inline-flex; /* Important for centering */
+    align-items: center;
+    justify-content: center;
 }
 
 .move-artist-btn:hover {
+    background-color: #ddd;
+}
+
+/* Up Arrow */
+.move-artist-btn[data-direction="up"]::before {
+    content: ''; /* Use a pseudo-element */
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 7px solid #555; /* Arrow color */
+}
+
+/* Down Arrow */
+.move-artist-btn[data-direction="down"]::before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #555; /* Arrow color */
+}
+
+#set-current-time-btn {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    margin-left: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#set-current-time-btn:hover {
     background-color: #ddd;
 }
