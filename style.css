@@ -385,3 +385,7 @@ margin-right: 10px; /* Add some space between buttons and name input */
 #set-current-time-btn:hover {
     background-color: #ddd;
 }
+
+#pause-btn {
+    background-color: gray; /* initial color */
+}

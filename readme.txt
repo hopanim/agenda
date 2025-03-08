@@ -1,6 +1,21 @@
-Last Updated: 3-2-25 8:50pm
+Last Updated: 3-8-25
+
+PAUSE BUTTON WORKING!
+
+Cleaned up comments in code.
+
+Has start & end times vs. enter time allotted.
+
+-----------
+
+
 
 STABLE
+Working autocomplete
+Clickablility could be improved
+
+
+Everything works great. 
 
 
 ----

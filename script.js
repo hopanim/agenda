@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const startReviewBtn = document.getElementById('start-review-btn');
     const nextArtistBtn = document.getElementById('next-artist-btn');
     const addArtistBtn = document.getElementById('add-artist-btn');
-    const setCurrentTimeBtn = document.getElementById('set-current-time-btn'); // Get the new button
+    const setCurrentTimeBtn = document.getElementById('set-current-time-btn');
+    const pauseBtn = document.getElementById('pause-btn'); // New Pause button
 
     const totalShotsDisplay = document.getElementById('total-shots-display');
     const totalTimeRemainingDisplay = document.getElementById('total-time-remaining-display');
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timerInterval: null,
         totalTimeRemaining: 0,
         sessionStarted: false,
+        paused: false  // New property to control pause for artist list updates
     };
 
     // Sortable instance.  Needs to be accessible to multiple functions.
@@ -52,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "hcastillo", firstName: "Heaven", lastName: "Castillo" },
         { username: "jackshaocheng", firstName: "Jack", lastName: "Cheng" },
         { username: "cchua", firstName: "Chris", lastName: "Chua" },
-        { username: "chunchiu", firstName: "John Chun Chiu", lastName: "Lee" },  //Special case handling
+        { username: "chunchiu", firstName: "John Chun Chiu", lastName: "Lee" },
         { username: "coderre", firstName: "Brett", lastName: "Coderre" },
         { username: "bethdavid", firstName: "Beth", lastName: "David" },
         { username: "ydekker", firstName: "Youri", lastName: "Dekker" },
@@ -83,14 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "chloemerwin", firstName: "Chloe", lastName: "Merwin" },
         { username: "jlmigita", firstName: "Jennifer", lastName: "Migita" },
         { username: "cameron", firstName: "Cameron", lastName: "Miyasaki" },
-        { username: "bruna", firstName: "Bruna", lastName: "Moniz Berford" },
+        { username: "bruna", firstName: "Bruna", lastName: "Berford" },
         { username: "shaunzye", firstName: "Sean", lastName: "Muriithi" },
-        { username: "jcnavarro", firstName: "Juan Carlos", lastName: "Navarro-Carrion" }, //Special Case
+        { username: "jcnavarro", firstName: "Juan Carlos", lastName: "Navarro-Carrion" },
         { username: "victor", firstName: "Victor", lastName: "Navone" },
         { username: "dnguyen", firstName: "Dan", lastName: "Nguyen" },
         { username: "eokba", firstName: "Eddy", lastName: "Okba" },
         { username: "jordi", firstName: "Jordi", lastName: "Onate Isal" },
-        { username: "davidspeng", firstName: "David", lastName: "S Peng" },//Special case
+        { username: "davidspeng", firstName: "David", lastName: "S Peng" },
         { username: "tpixton", firstName: "Tim", lastName: "Pixton" },
         { username: "bobby", firstName: "Bobby", lastName: "Podesta" },
         { username: "dpoznansky", firstName: "Deborah", lastName: "Poznansky" },
@@ -113,10 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "tstorhoff", firstName: "Teresa", lastName: "Storhoff" },
         { username: "bensu", firstName: "Benjamin", lastName: "Su" },
         { username: "rsuter", firstName: "Raphael", lastName: "Suter" },
-        { username: "latanimoto", firstName: "Laura", lastName: "Aika Tanimoto" }, //Special Case
+        { username: "latanimoto", firstName: "Laura", lastName: "Aika Tanimoto" },
         { username: "rthompson", firstName: "Rob", lastName: "Thompson" },
         { username: "btower", firstName: "Becki", lastName: "Tower" },
-        { username: "laclaude", firstName: "Jean-Claude", lastName: "Tran" },//Special Case
+        { username: "laclaude", firstName: "Jean-Claude", lastName: "Tran" },
         { username: "luribe", firstName: "Luis", lastName: "Uribe" },
         { username: "kristoph", firstName: "Kristophe", lastName: "Vergne" },
         { username: "thewallrus", firstName: "Nathan", lastName: "Wall" },
@@ -126,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "awinterstein", firstName: "Alon", lastName: "Winterstein" },
         { username: "kureha", firstName: "Kureha", lastName: "Yokoo" },
         { username: "jyuster", firstName: "Jack", lastName: "Yuster" },
-        { username: "tzach", firstName: "Tom", lastName: "Zach" },
+        { username: "tzach", firstName: "Tom", lastName: "Zach" }
     ];
 
-    // Sort the array: first by firstName, then by lastName, and finally by username
+    // Sort the array: first by firstName, then lastName, then username
     users.sort((a, b) => {
         if (a.firstName < b.firstName) return -1;
         if (a.firstName > b.firstName) return 1;
@@ -139,27 +141,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (a.username > b.username) return 1;
         return 0;
     });
+
     // --- Autocomplete Function ---
     function autocomplete(inp, arr) {
         let currentFocus;
-
         inp.addEventListener("input", function(e) {
             const val = this.value;
             closeAllLists();
             if (!val) { return false; }
             currentFocus = -1;
-
             const a = document.createElement("DIV");
             a.setAttribute("id", this.id + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             this.insertAdjacentElement('afterend', a);
-
             for (let i = 0; i < arr.length; i++) {
                 const user = arr[i];
                 const firstNameMatch = user.firstName.toLowerCase().includes(val.toLowerCase());
                 const lastNameMatch = user.lastName.toLowerCase().includes(val.toLowerCase());
                 const usernameMatch = user.username.toLowerCase().startsWith(val.toLowerCase());
-
                 if (firstNameMatch || lastNameMatch || usernameMatch) {
                     const b = document.createElement("DIV");
                     b.innerHTML = user.username;
@@ -167,10 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     b.style.width = "100%";
                     b.style.height = "auto";
                     b.style.display = "block";
-
                     b.addEventListener("click", function(e) {
                         inp.value = this.getElementsByTagName("input")[0].value;
-
                         const artistId = parseInt(inp.closest('li').dataset.id, 10);
                         const artist = state.artists.find(a => a.id === artistId);
                         if (artist) {
@@ -184,12 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     b.addEventListener("mousedown", function(e) {
                         e.stopPropagation();
                     });
-
                     a.appendChild(b);
                 }
             }
         });
-
         inp.addEventListener("keydown", function(e) {
             let x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
@@ -207,17 +202,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     // If no suggestion is selected, use the first suggestion, or the current input
                     let firstSuggestion = x && x[0] ? x[0].getElementsByTagName("input")[0].value : null;
                     if (firstSuggestion) {
-                         inp.value = firstSuggestion;
-                         const artistId = parseInt(inp.closest('li').dataset.id, 10);
-                         const artist = state.artists.find(a => a.id === artistId);
-                         if(artist) {
-                             artist.name = inp.value;
-                             updateDisplay();
-                         }
+                        inp.value = firstSuggestion;
+                        const artistId = parseInt(inp.closest('li').dataset.id, 10);
+                        const artist = state.artists.find(a => a.id === artistId);
+                        if (artist) {
+                            artist.name = inp.value;
+                            updateDisplay();
+                        }
                     } else {
                         const artistId = parseInt(inp.closest('li').dataset.id, 10);
                         const artist = state.artists.find(a => a.id === artistId);
-                        if(artist){
+                        if (artist) {
                             artist.name = inp.value;
                             updateDisplay();
                         }
@@ -226,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
         function addActive(x) {
             if (!x) return false;
             removeActive(x);
@@ -234,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentFocus < 0) currentFocus = (x.length - 1);
             x[currentFocus].classList.add("autocomplete-active");
         }
-
         function removeActive(x) {
             for (let i = 0; i < x.length; i++) {
                 x[i].classList.remove("autocomplete-active");
@@ -279,10 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateTotalTimeAllotment(startTime, endTime) {
         const [startHours, startMinutes] = startTime.split(':').map(Number);
         const [endHours, endMinutes] = endTime.split(':').map(Number);
-
         const startDate = new Date();
         startDate.setHours(startHours, startMinutes, 0, 0);
-
         const endDate = new Date();
         endDate.setHours(endHours, endMinutes, 0, 0);
 
@@ -290,23 +281,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (endDate <= startDate) {
           endDate.setDate(endDate.getDate() + 1); // Add one day to the end date
          }
-
         const diffInMilliseconds = endDate - startDate;
         return Math.max(0, Math.floor(diffInMilliseconds / 1000)); // Return in seconds
     }
 
-
     function calculateEstimatedTimePerArtist() {
         const totalRemainingShots = calculateTotalShotsRemaining();
         const remainingArtistsCount = state.artists.filter(artist => !artist.completed).length;
-
         if (totalRemainingShots === 0 || remainingArtistsCount === 0 || state.totalTimeRemaining <= 0) {
             state.artists.forEach(artist => artist.estimatedTime = "00:00");
             return;
         }
-
         const remainingTimePerShot = state.totalTimeRemaining / totalRemainingShots;
-
         state.artists.forEach(artist => {
             if (!artist.completed) {
                 const estimatedSeconds = remainingTimePerShot * parseInt(artist.shots, 10);
@@ -317,46 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateDisplay() {
-        const totalShots = calculateTotalShots();
-        const totalShotsRemaining = calculateTotalShotsRemaining();
-        const totalPeopleRemaining = calculateTotalPeopleRemaining();
-
-        totalShotsDisplay.textContent = totalShots;
-        totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
-        totalShotsRemainingDisplay.textContent = totalShotsRemaining;
-        totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
-
-        calculateEstimatedTimePerArtist();
-        renderArtistList();
-
-        if (state.currentArtistIndex !== -1) {
-            const currentArtist = state.artists[state.currentArtistIndex];
-            currentArtistNameDisplay.textContent = currentArtist.name + " (" + currentArtist.shots + ")";
-            const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
-            currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
-
-            const estimatedTimeInSeconds = timeToSeconds(currentArtist.estimatedTime);
-            const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
-            currentArtistEstTimeRemDisplay.textContent = formatTime(remainingEstTimeForCurrent);
-            if (remainingEstTimeForCurrent < 0) {
-                currentArtistEstTimeRemDisplay.classList.add('negative-time');
-            } else {
-                currentArtistEstTimeRemDisplay.classList.remove('negative-time');
-            }
-        } else {
-            currentArtistNameDisplay.textContent = '';
-            currentArtistTimeElapsedDisplay.textContent = '00:00';
-            currentArtistEstTimeRemDisplay.textContent = '00:00';
-        }
-
-        // Update Sortable draggability
-        updateSortableDraggability();
-
-        // Disable totalArtistsInput if the session has started
-        totalArtistsInput.disabled = state.sessionStarted;
-    }
-
     function timeToSeconds(timeStr) {
         if (timeStr === "Completed") return 0;
         const parts = timeStr.split(':');
@@ -365,11 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderArtistList() {
         artistAgendaList.innerHTML = ''; // Clear existing content
-
         state.artists.forEach((artist, index) => {
             const listItem = document.createElement('li');
             listItem.dataset.id = artist.id;
-
             if (index === state.currentArtistIndex && state.sessionStartTime) {
                 listItem.classList.add('active-artist');
             }
@@ -403,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Artist Details Div ---
             const artistDetailsDiv = document.createElement('div');
             artistDetailsDiv.className = 'artist-details';
-
             const nameInput = document.createElement('input');
             nameInput.type = 'text';
             nameInput.className = 'artist-name-input';
@@ -414,11 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- Shots Div ---
             const shotsDiv = document.createElement('div');
-
             const shotsLabel = document.createElement('label');
             shotsLabel.textContent = 'Shots:';
             shotsDiv.appendChild(shotsLabel);
-
             const shotsInput = document.createElement('input');
             shotsInput.type = 'number';
             shotsInput.className = 'artist-shots-input';
@@ -455,21 +396,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 calculateEstimatedTimePerArtist();
                 updateDisplay();
             });
-
             nameInput.addEventListener('change', (event) => {
                 artist.name = event.target.value;
                 updateDisplay();
             });
-
             deleteBtn.addEventListener('click', () => {
                 deleteArtist(artist.id);
             });
-
             upBtn.addEventListener('click', (event) => {
                 const artistId = parseInt(event.target.dataset.artistId, 10);
                 moveArtist(artistId, 'up');
             });
-
             downBtn.addEventListener('click', (event) => {
                 const artistId = parseInt(event.target.dataset.artistId, 10);
                 moveArtist(artistId, 'down');
@@ -479,7 +416,6 @@ document.addEventListener('DOMContentLoaded', () => {
             function handleTab(event, inputType, currentIndex) {
                 if (event.key === 'Tab' && !event.shiftKey) {
                     event.preventDefault();
-
                     const nextIndex = currentIndex + 1;
                     if (nextIndex < state.artists.length) {
                         // Focus on the next input of the SAME type
@@ -494,17 +430,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         const firstInput = artistAgendaList.children[0].querySelector(
                             inputType === 'name' ? '.artist-name-input' : '.artist-shots-input'
                         );
-                       if (firstInput) {
+                        if (firstInput) {
                             firstInput.focus();
                         }
                     }
                 }
             }
-
             nameInput.addEventListener('keydown', (event) => {
                 handleTab(event, 'name', index);
             });
-
             shotsInput.addEventListener('keydown', (event) => {
                 handleTab(event, 'shots', index);
             });
@@ -515,6 +449,54 @@ document.addEventListener('DOMContentLoaded', () => {
             autocomplete(nameInput, users);
         });
     }
+
+    function updateDisplay() {
+        const totalShots = calculateTotalShots();
+        const totalShotsRemaining = calculateTotalShotsRemaining();
+        const totalPeopleRemaining = calculateTotalPeopleRemaining();
+        totalShotsDisplay.textContent = totalShots;
+        totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
+        totalShotsRemainingDisplay.textContent = totalShotsRemaining;
+        totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
+        calculateEstimatedTimePerArtist();
+        // Only update the artist list if not paused
+        if (!state.paused) {
+            renderArtistList();
+        }
+        if (state.currentArtistIndex !== -1) {
+            const currentArtist = state.artists[state.currentArtistIndex];
+            currentArtistNameDisplay.textContent = currentArtist.name + " (" + currentArtist.shots + ")";
+            const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
+            currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
+            const estimatedTimeInSeconds = timeToSeconds(currentArtist.estimatedTime);
+            const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
+            currentArtistEstTimeRemDisplay.textContent = formatTime(remainingEstTimeForCurrent);
+            if (remainingEstTimeForCurrent < 0) {
+                currentArtistEstTimeRemDisplay.classList.add('negative-time');
+            } else {
+                currentArtistEstTimeRemDisplay.classList.remove('negative-time');
+            }
+        } else {
+            currentArtistNameDisplay.textContent = '';
+            currentArtistTimeElapsedDisplay.textContent = '00:00';
+            currentArtistEstTimeRemDisplay.textContent = '00:00';
+        }
+        updateSortableDraggability();
+        totalArtistsInput.disabled = state.sessionStarted;
+    }
+
+// --- Pause Button Event Listener ---
+pauseBtn.addEventListener('click', () => {
+    state.paused = !state.paused;
+    pauseBtn.textContent = state.paused ? "Resume" : "Edit Artists";
+    // Change color based on paused state:
+    // When paused, use orange; otherwise, revert to blue.
+    pauseBtn.style.backgroundColor = state.paused ? "#8dc68d" : "gray";
+    if (!state.paused) {
+        updateDisplay();
+    }
+});
+
     function initializeArtists() {
         const numArtists = parseInt(totalArtistsInput.value, 10);
         state.artists = Array.from({ length: numArtists }, (_, i) => ({
@@ -560,17 +542,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startReviewSession() {
         if (state.artists.length === 0 || state.sessionStarted) return;
-
         state.sessionStarted = true;
         state.currentArtistIndex = 0;
         // Use the pre-calculated totalTimeAllotment
         state.totalTimeRemaining = state.totalTimeAllotment;
-
         startSessionTimer();
         startCurrentArtistTimer();
         nextArtistBtn.disabled = false;
         updateDisplay();
-
         startReviewBtn.disabled = true;
         startReviewBtn.style.cursor = "default";
 
@@ -583,9 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.artists[state.currentArtistIndex].completed = true;
             stopCurrentArtistTimer();
         }
-
         state.currentArtistIndex++;
-
         if (state.currentArtistIndex < state.artists.length) {
             startCurrentArtistTimer();
         } else {
@@ -595,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(state.timerInterval);
             alert("Review session completed for all artists!");
         }
-        updateDisplay(); // Includes updateSortableDraggability()
+        updateDisplay();
     }
 
     function addArtist() {
@@ -609,17 +586,14 @@ document.addEventListener('DOMContentLoaded', () => {
         state.artists.push(newArtist);
         renderArtistList();
         updateDisplay();
-
     }
 
     function deleteArtist(artistId) {
         const artistIndexToDelete = state.artists.findIndex(artist => artist.id === artistId);
         if (artistIndexToDelete === -1) return;
-
         if(artistIndexToDelete === state.currentArtistIndex){
             stopCurrentArtistTimer();
         }
-
         if (state.currentArtistIndex > artistIndexToDelete) {
             state.currentArtistIndex--;
         } else if(state.currentArtistIndex === artistIndexToDelete) {
@@ -645,14 +619,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function moveArtist(artistId, direction) {
         const currentIndex = state.artists.findIndex(artist => artist.id === artistId);
         if (currentIndex === -1) return;
-
         let newIndex;
         if (direction === 'up') {
             newIndex = Math.max(0, currentIndex - 1);
         } else if (direction === 'down') {
             newIndex = Math.min(state.artists.length - 1, currentIndex + 1);
         } else {
-            return; // Invalid direction
+            return;
         }
 
         if (newIndex === currentIndex) return; // No move needed
@@ -674,13 +647,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentArtistIndex === currentIndex) {
             state.currentArtistIndex = newIndex;
         } else if (state.currentArtistIndex === newIndex) {
-          state.currentArtistIndex = currentIndex;
+            state.currentArtistIndex = currentIndex;
         } else if (currentIndex < state.currentArtistIndex && newIndex >= state.currentArtistIndex) {
             state.currentArtistIndex--;
         } else if (currentIndex > state.currentArtistIndex && newIndex <= state.currentArtistIndex) {
             state.currentArtistIndex++;
         }
-
         renderArtistList();
         updateDisplay();
     }
@@ -702,12 +674,11 @@ document.addEventListener('DOMContentLoaded', () => {
              for (let i = 0; i < artistAgendaList.children.length; i++){
                const listItem = artistAgendaList.children[i];
                if (i <= state.currentArtistIndex) {
-                 sortableInstance.option('draggable', '.disabled-sortable'); // No elements draggable
+                 sortableInstance.option('draggable', '.disabled-sortable');
                } else {
-                  sortableInstance.option('draggable', 'li'); // Reset to normal
+                  sortableInstance.option('draggable', 'li');
                }
              }
-
           } else {
              // If session not started, allow all dragging.
              sortableInstance.option('group', { name: 'artists', pull: true, put: true });
@@ -718,14 +689,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     totalArtistsInput.addEventListener('change', initializeArtists);
-
     startTimeInput.addEventListener('change', () => {
       state.startTime = startTimeInput.value;
       state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
       state.totalTimeRemaining = state.totalTimeAllotment;
       updateDisplay();
     });
-
     endTimeInput.addEventListener('change', () => {
       state.endTime = endTimeInput.value;
       state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
@@ -740,15 +709,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const currentTime = `${hours}:${minutes}`;
-
         startTimeInput.value = currentTime;
-        state.startTime = currentTime;  // Update the state as well!
+        state.startTime = currentTime;
         state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
         state.totalTimeRemaining = state.totalTimeAllotment;
         updateDisplay();
     });
-
-
     startReviewBtn.addEventListener('click', startReviewSession);
     nextArtistBtn.addEventListener('click', nextArtist);
     addArtistBtn.addEventListener('click', addArtist);
@@ -768,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const movedArtist = state.artists[oldIndex];
                 state.artists.splice(oldIndex, 1);
                 state.artists.splice(newIndex, 0, movedArtist);
-
                 if (state.currentArtistIndex === oldIndex) {
                     state.currentArtistIndex = newIndex;
                 } else if (state.currentArtistIndex > oldIndex && state.currentArtistIndex <= newIndex) {
@@ -777,11 +742,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.currentArtistIndex++;
                 }
                 renderArtistList();
-                updateDisplay(); // Includes updateSortableDraggability
+                updateDisplay();
             }
         },
     });
 
     initializeArtists();
-    updateDisplay(); // Initial display update
+    updateDisplay();
 });
