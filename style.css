@@ -61,7 +61,6 @@ section {
     width: 110px;
 }
 
-
 #artist-agenda-list {
     list-style: none;
     padding: 0;
@@ -76,17 +75,15 @@ section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: grab; /* Change cursor on hover */
+    cursor: grab;
     position: relative;
-    transition: box-shadow 0.2s ease; /* Add transition for box-shadow */
+    transition: box-shadow 0.2s ease;
 }
 
-/* Active drag cursor */
 #artist-agenda-list li:active {
     cursor: grabbing;
 }
 
-/* Visual distinction for rows */
 #artist-agenda-list li::before {
     content: '';
     position: absolute;
@@ -97,7 +94,7 @@ section {
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 4px;
     opacity: 0;
-    transition: opacity 0.2s ease, background-color 0.2s ease; /* Smooth transition */
+    transition: opacity 0.2s ease, background-color 0.2s ease;
     z-index: -1;
 }
 
@@ -105,17 +102,16 @@ section {
     background-color: rgba(0, 0, 128, 0.05);
 }
 
-/* Show overlay on hover and drag - Increased intensity */
 #artist-agenda-list li:hover::before {
     opacity: 1;
-    background-color: rgba(0, 0, 0, 0.04); /* Darker on hover */
+    background-color: rgba(0, 0, 0, 0.04);
 }
 #artist-agenda-list.sortable-drag li::before{
     opacity: 1;
 }
-/*Increased intensity*/
+
 #artist-agenda-list li:hover {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* More pronounced box-shadow */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 #artist-agenda-list li.active-artist {
@@ -138,7 +134,6 @@ section {
 
 .artist-details input[type="text"] {
     margin-right: auto;
-
 }
 
 .artist-shots-input {
@@ -161,7 +156,8 @@ section {
     font-weight: bold;
 }
 
-.agenda-actions button,  #current-artist-section button {
+.agenda-actions button,  
+#current-artist-section button {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -178,14 +174,32 @@ section {
 #next-artist-btn {
     background-color: #00c853;
 }
-.agenda-actions button:not(:disabled):hover,
-#current-artist-section button:not(:disabled):hover {
-    opacity: 0.9;
-}
-
 #next-artist-btn:disabled {
     background-color: #ccc;
     cursor: default;
+}
+
+/* Next Shot Button Styling */
+#next-shot-btn {
+    background-color: #00c853;
+}
+#next-shot-btn:disabled {
+    background-color: #ccc;
+    cursor: default;
+}
+
+/* Generic Button Pressed State */
+button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+button:not(:disabled):active {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.agenda-actions button:not(:disabled):hover,
+#current-artist-section button:not(:disabled):hover {
+    opacity: 0.9;
 }
 
 #current-artist-section {
@@ -265,9 +279,9 @@ section {
 }
 
 #session-control-section .big-button:disabled {
-background-color: #ccc;
-cursor: default;
-box-shadow: none;
+    background-color: #ccc;
+    cursor: default;
+    box-shadow: none;
 }
 
 .autocomplete {
@@ -306,25 +320,23 @@ box-shadow: none;
     color: #ffffff;
 }
 
-/* Styles for the two-column layout */
 .bottom-section-container {
-    display: flex;         /* Enable Flexbox */
-    flex-direction: row;  /* Arrange children side-by-side */
-    gap: 20px;            /* Add some space between the columns */
-    justify-content: flex-start; /* Left-align the columns */
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: flex-start;
 }
 
 .bottom-section-container > section {
-    flex: 0 1 auto;       /*  Don't grow, shrink if needed, auto width */
-    margin-bottom: 0;     /* Remove the default margin-bottom */
+    flex: 0 1 auto;
+    margin-bottom: 0;
 }
 
-/* Styles for the move buttons */
 .move-buttons-container {
-display: flex;
-flex-direction: row; /* Stack buttons horizontally */
-align-items: center;
-margin-right: 10px; /* Add some space between buttons and name input */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 10px;
 }
 
 .move-artist-btn {
@@ -336,12 +348,11 @@ margin-right: 10px; /* Add some space between buttons and name input */
     font-size: 12px;
     line-height: 1;
     margin-right: 5px;
-    /* Remove default text content */
     text-indent: -9999px;
     overflow: hidden;
-    width: 16px; /* Set explicit width/height */
+    width: 16px;
     height: 16px;
-    display: inline-flex; /* Important for centering */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -350,18 +361,16 @@ margin-right: 10px; /* Add some space between buttons and name input */
     background-color: #ddd;
 }
 
-/* Up Arrow */
 .move-artist-btn[data-direction="up"]::before {
-    content: ''; /* Use a pseudo-element */
+    content: '';
     display: inline-block;
     width: 0;
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 7px solid #555; /* Arrow color */
+    border-bottom: 7px solid #555;
 }
 
-/* Down Arrow */
 .move-artist-btn[data-direction="down"]::before {
     content: '';
     display: inline-block;
@@ -369,7 +378,7 @@ margin-right: 10px; /* Add some space between buttons and name input */
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 7px solid #555; /* Arrow color */
+    border-top: 7px solid #555;
 }
 
 #set-current-time-btn {
@@ -387,5 +396,19 @@ margin-right: 10px; /* Add some space between buttons and name input */
 }
 
 #pause-btn {
-    background-color: gray; /* initial color */
+    background-color: gray;
+}
+
+#current-artist-section #undo-btn {
+    background-color: #748d85; /* your desired color */
+}
+#current-artist-section #undo-btn:disabled {
+    background-color: #ccc;
+    cursor: default;
+}
+
+.shots-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }

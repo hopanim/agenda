@@ -6,9 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const artistAgendaList = document.getElementById('artist-agenda-list');
     const startReviewBtn = document.getElementById('start-review-btn');
     const nextArtistBtn = document.getElementById('next-artist-btn');
+    const nextShotBtn = document.getElementById('next-shot-btn'); // NEW Next Shot button
     const addArtistBtn = document.getElementById('add-artist-btn');
     const setCurrentTimeBtn = document.getElementById('set-current-time-btn');
     const pauseBtn = document.getElementById('pause-btn'); // New Pause button
+    const undoBtn = document.getElementById('undo-btn'); // NEW Undo button
 
     const totalShotsDisplay = document.getElementById('total-shots-display');
     const totalTimeRemainingDisplay = document.getElementById('total-time-remaining-display');
@@ -31,8 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         timerInterval: null,
         totalTimeRemaining: 0,
         sessionStarted: false,
-        paused: false  // New property to control pause for artist list updates
+        paused: false,  // New property to control pause for artist list updates
+        initialTotalShots: 0  // NEW property to capture the total shots when review starts
     };
+
+    // This backup will store the state prior to a "Next Artist" action (only one undo is allowed)
+    let undoBackup = null;
 
     // Sortable instance.  Needs to be accessible to multiple functions.
     let sortableInstance = null;
@@ -261,11 +267,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateTotalShotsRemaining() {
-        return state.artists.reduce((sum, artist) => artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
+        return state.artists.reduce((sum, artist) =>
+            artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
     }
 
     function calculateTotalPeopleRemaining() {
-        return state.artists.reduce((sum, artist) => artist.completed ? sum : sum + 1, 0);
+        let count = state.artists.reduce((sum, artist) => artist.completed ? sum : sum + 1, 0);
+        if (state.currentArtistIndex !== -1 && !state.artists[state.currentArtistIndex].completed) {
+            count -= 1;
+        }
+        return count;
     }
 
     // Calculate total time allotment based on start and end times
@@ -277,10 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const endDate = new Date();
         endDate.setHours(endHours, endMinutes, 0, 0);
 
-          // Check if end time is earlier than start time (crosses midnight)
+        // Check if end time is earlier than start time (crosses midnight)
         if (endDate <= startDate) {
-          endDate.setDate(endDate.getDate() + 1); // Add one day to the end date
-         }
+            endDate.setDate(endDate.getDate() + 1); // Add one day to the end date
+        }
         const diffInMilliseconds = endDate - startDate;
         return Math.max(0, Math.floor(diffInMilliseconds / 1000)); // Return in seconds
     }
@@ -298,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const estimatedSeconds = remainingTimePerShot * parseInt(artist.shots, 10);
                 artist.estimatedTime = formatTime(estimatedSeconds);
             } else {
-                artist.estimatedTime = "Completed";
+                artist.estimatedTime = "Done";
             }
         });
     }
@@ -314,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.artists.forEach((artist, index) => {
             const listItem = document.createElement('li');
             listItem.dataset.id = artist.id;
-            if (index === state.currentArtistIndex && state.sessionStartTime) {
+            if (index === state.currentArtistIndex && state.sessionStarted) {
                 listItem.classList.add('active-artist');
             }
             if (artist.completed) {
@@ -343,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
             downBtn.tabIndex = -1; // Prevent tabbing to move buttons
             moveButtonsContainer.appendChild(downBtn);
 
-
             // --- Artist Details Div ---
             const artistDetailsDiv = document.createElement('div');
             artistDetailsDiv.className = 'artist-details';
@@ -354,9 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
             nameInput.value = '';  // Use an empty string for the input value
             artistDetailsDiv.appendChild(nameInput);
 
-
             // --- Shots Div ---
             const shotsDiv = document.createElement('div');
+            shotsDiv.className = 'shots-container'; // NEW: add a class for horizontal layout
             const shotsLabel = document.createElement('label');
             shotsLabel.textContent = 'Shots:';
             shotsDiv.appendChild(shotsLabel);
@@ -384,7 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
             listItem.appendChild(shotsDiv);
             listItem.appendChild(estimatedTimeSpan);
             listItem.appendChild(deleteBtn);
-
 
             // --- Event Listeners ---
             shotsInput.addEventListener('change', (event) => {
@@ -451,10 +460,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDisplay() {
-        const totalShots = calculateTotalShots();
         const totalShotsRemaining = calculateTotalShotsRemaining();
         const totalPeopleRemaining = calculateTotalPeopleRemaining();
-        totalShotsDisplay.textContent = totalShots;
+        // If the session has started, use the captured initial total shots.
+        if (state.sessionStarted) {
+            totalShotsDisplay.textContent = state.initialTotalShots;
+        } else {
+            totalShotsDisplay.textContent = calculateTotalShots();
+        }
         totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
         totalShotsRemainingDisplay.textContent = totalShotsRemaining;
         totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
@@ -481,21 +494,31 @@ document.addEventListener('DOMContentLoaded', () => {
             currentArtistTimeElapsedDisplay.textContent = '00:00';
             currentArtistEstTimeRemDisplay.textContent = '00:00';
         }
+        // --- Update Next Shot Button ---
+        // Disable if no active artist, if artist is completed,
+        // or if the current artist has 1 or fewer shots left.
+        if (state.currentArtistIndex === -1 ||
+            state.artists[state.currentArtistIndex].completed ||
+            state.artists[state.currentArtistIndex].shots <= 1) {
+            nextShotBtn.disabled = true;
+        } else {
+            nextShotBtn.disabled = false;
+        }
         updateSortableDraggability();
         totalArtistsInput.disabled = state.sessionStarted;
     }
 
-// --- Pause Button Event Listener ---
-pauseBtn.addEventListener('click', () => {
-    state.paused = !state.paused;
-    pauseBtn.textContent = state.paused ? "Resume" : "Edit Artists";
-    // Change color based on paused state:
-    // When paused, use orange; otherwise, revert to blue.
-    pauseBtn.style.backgroundColor = state.paused ? "#8dc68d" : "gray";
-    if (!state.paused) {
-        updateDisplay();
-    }
-});
+    // --- Pause Button Event Listener ---
+    pauseBtn.addEventListener('click', () => {
+        state.paused = !state.paused;
+        pauseBtn.textContent = state.paused ? "Resume" : "Edit Artists";
+        // Change color based on paused state:
+        // When paused, use orange; otherwise, revert to gray.
+        pauseBtn.style.backgroundColor = state.paused ? "#8dc68d" : "gray";
+        if (!state.paused) {
+            updateDisplay();
+        }
+    });
 
     function initializeArtists() {
         const numArtists = parseInt(totalArtistsInput.value, 10);
@@ -542,10 +565,20 @@ pauseBtn.addEventListener('click', () => {
 
     function startReviewSession() {
         if (state.artists.length === 0 || state.sessionStarted) return;
+        // Update the start time to current time automatically
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        startTimeInput.value = `${hours}:${minutes}`;
+        state.startTime = startTimeInput.value;
+        // Recalculate total time allotment with the updated start time
+        state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
+        state.totalTimeRemaining = state.totalTimeAllotment;
+        
+        // Capture the initial total shots at review start.
+        state.initialTotalShots = calculateTotalShots();
         state.sessionStarted = true;
         state.currentArtistIndex = 0;
-        // Use the pre-calculated totalTimeAllotment
-        state.totalTimeRemaining = state.totalTimeAllotment;
         startSessionTimer();
         startCurrentArtistTimer();
         nextArtistBtn.disabled = false;
@@ -558,6 +591,12 @@ pauseBtn.addEventListener('click', () => {
     }
 
     function nextArtist() {
+        // Store backup for undo (overwrite any previous backup)
+        undoBackup = {
+            previousIndex: state.currentArtistIndex
+        };
+        undoBtn.disabled = false;
+
         if (state.currentArtistIndex !== -1) {
             state.artists[state.currentArtistIndex].completed = true;
             stopCurrentArtistTimer();
@@ -575,6 +614,36 @@ pauseBtn.addEventListener('click', () => {
         updateDisplay();
     }
 
+    // --- Undo Button Event Listener ---
+    undoBtn.addEventListener('click', () => {
+        if (!undoBackup) return;
+        // Stop the current artist timer if running
+        stopCurrentArtistTimer();
+        // Revert the currentArtistIndex to the previous value stored in backup
+        state.currentArtistIndex = undoBackup.previousIndex;
+        // Mark the artist as not completed
+        if (state.currentArtistIndex !== -1) {
+            state.artists[state.currentArtistIndex].completed = false;
+            startCurrentArtistTimer();
+        }
+        // Ensure the session remains active and the next artist button is enabled
+        state.sessionStarted = true;
+        nextArtistBtn.disabled = false;
+        // Clear the backup and disable the undo button
+        undoBackup = null;
+        undoBtn.disabled = true;
+        updateDisplay();
+    });
+
+    // --- Modified Next Shot Button Functionality ---
+    nextShotBtn.addEventListener('click', () => {
+        if (state.currentArtistIndex === -1) return;
+        const currentArtist = state.artists[state.currentArtistIndex];
+        if (currentArtist.completed || currentArtist.shots <= 1) return;
+        currentArtist.shots -= 1;
+        updateDisplay();
+    });
+
     function addArtist() {
         const newArtist = {
             id: Date.now(),
@@ -591,17 +660,17 @@ pauseBtn.addEventListener('click', () => {
     function deleteArtist(artistId) {
         const artistIndexToDelete = state.artists.findIndex(artist => artist.id === artistId);
         if (artistIndexToDelete === -1) return;
-        if(artistIndexToDelete === state.currentArtistIndex){
+        if (artistIndexToDelete === state.currentArtistIndex) {
             stopCurrentArtistTimer();
         }
         if (state.currentArtistIndex > artistIndexToDelete) {
             state.currentArtistIndex--;
-        } else if(state.currentArtistIndex === artistIndexToDelete) {
-            if (state.artists.length > 1 && state.currentArtistIndex < state.artists.length -1) {
+        } else if (state.currentArtistIndex === artistIndexToDelete) {
+            if (state.artists.length > 1 && state.currentArtistIndex < state.artists.length - 1) {
                 startCurrentArtistTimer();
             } else {
                 state.currentArtistIndex = -1;
-                if(state.sessionStarted) {
+                if (state.sessionStarted) {
                     clearInterval(state.timerInterval);
                     state.timerInterval = null;
                     state.sessionStarted = false;
@@ -633,11 +702,10 @@ pauseBtn.addEventListener('click', () => {
         // Prevent moving above current artist during session
         if (state.sessionStarted && state.currentArtistIndex !== -1) {
             if (direction === 'up' && newIndex <= state.currentArtistIndex) {
-                //Attempt to move to a position *before or at* the current.
-                return; //Prevent the change.
+                // Attempt to move to a position *before or at* the current.
+                return; // Prevent the change.
             }
         }
-
 
         // Move the artist in the array
         const [movedArtist] = state.artists.splice(currentIndex, 1);
@@ -657,11 +725,10 @@ pauseBtn.addEventListener('click', () => {
         updateDisplay();
     }
 
-
     // Update Sortable Draggability
     function updateSortableDraggability() {
         if (sortableInstance) {
-          if (state.sessionStarted && state.currentArtistIndex !== -1) {
+            if (state.sessionStarted && state.currentArtistIndex !== -1) {
                 sortableInstance.option('group', {
                     name: 'artists',
                     pull: true,
@@ -670,38 +737,37 @@ pauseBtn.addEventListener('click', () => {
                         return to.el.children.length <= state.currentArtistIndex;
                     }
                 });
-             // Loop through to set individual draggability
-             for (let i = 0; i < artistAgendaList.children.length; i++){
-               const listItem = artistAgendaList.children[i];
-               if (i <= state.currentArtistIndex) {
-                 sortableInstance.option('draggable', '.disabled-sortable');
-               } else {
-                  sortableInstance.option('draggable', 'li');
-               }
-             }
-          } else {
-             // If session not started, allow all dragging.
-             sortableInstance.option('group', { name: 'artists', pull: true, put: true });
-             sortableInstance.option('draggable', 'li');
-          }
+                // Loop through to set individual draggability
+                for (let i = 0; i < artistAgendaList.children.length; i++){
+                    const listItem = artistAgendaList.children[i];
+                    if (i <= state.currentArtistIndex) {
+                        sortableInstance.option('draggable', '.disabled-sortable');
+                    } else {
+                        sortableInstance.option('draggable', 'li');
+                    }
+                }
+            } else {
+                // If session not started, allow all dragging.
+                sortableInstance.option('group', { name: 'artists', pull: true, put: true });
+                sortableInstance.option('draggable', 'li');
+            }
         }
     }
 
     // --- Event Listeners ---
     totalArtistsInput.addEventListener('change', initializeArtists);
     startTimeInput.addEventListener('change', () => {
-      state.startTime = startTimeInput.value;
-      state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
-      state.totalTimeRemaining = state.totalTimeAllotment;
-      updateDisplay();
+        state.startTime = startTimeInput.value;
+        state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
+        state.totalTimeRemaining = state.totalTimeAllotment;
+        updateDisplay();
     });
     endTimeInput.addEventListener('change', () => {
-      state.endTime = endTimeInput.value;
-      state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
-      state.totalTimeRemaining = state.totalTimeAllotment;
-      updateDisplay();
+        state.endTime = endTimeInput.value;
+        state.totalTimeAllotment = calculateTotalTimeAllotment(state.startTime, state.endTime);
+        state.totalTimeRemaining = state.totalTimeAllotment;
+        updateDisplay();
     });
-
 
     // Event listener for the "Set Current Time" button
     setCurrentTimeBtn.addEventListener('click', () => {
