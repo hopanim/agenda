@@ -339,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Up Button ---
             const upBtn = document.createElement('button');
             upBtn.className = 'move-artist-btn';
-            upBtn.textContent = '↑';
             upBtn.dataset.direction = 'up';
             upBtn.dataset.artistId = artist.id;
             upBtn.tabIndex = -1; // Prevent tabbing to move buttons
@@ -348,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Down Button ---
             const downBtn = document.createElement('button');
             downBtn.className = 'move-artist-btn';
-            downBtn.textContent = '↓';
             downBtn.dataset.direction = 'down';
             downBtn.dataset.artistId = artist.id;
             downBtn.tabIndex = -1; // Prevent tabbing to move buttons
