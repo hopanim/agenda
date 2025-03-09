@@ -82,6 +82,12 @@ section {
     width: 110px;
 }
 
+.input-group input[type="time"],
+#set-current-time-btn {
+    color: #333;
+    -webkit-text-fill-color: #333;
+}
+
 /* ====================================================
    Autocomplete Styles
 ======================================================= */
@@ -265,7 +271,6 @@ button:not(:disabled):active {
 /* Specific Buttons */
 
 /* AGENDA SETUP */
-
 #set-current-time-btn {
     padding: 5px 10px;
     font-size: 0.8em;
@@ -281,7 +286,6 @@ button:not(:disabled):active {
 }
 
 /* AGENDA MANAGEMENT */
-
 #add-artist-btn {
     background-color: #008CBA;
 }
@@ -291,7 +295,6 @@ button:not(:disabled):active {
 }
 
 /* CURRENT ARTIST */
-
 #next-shot-btn {
     background-color: #8b8d74;
 }
@@ -318,7 +321,6 @@ button:not(:disabled):active {
     background-color: #ccc;
     cursor: default;
 }
-
 
 /* Big Button for Session Control */
 .big-button {
@@ -422,7 +424,7 @@ button:not(:disabled):active {
     padding: 2px 5px;
     margin: 2px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 0;
     line-height: 1;
     margin-right: 5px;
     text-indent: -9999px;
