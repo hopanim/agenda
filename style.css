@@ -411,7 +411,7 @@ button:not(:disabled):active {
    Delete Artist Button - Restored to Original Colors
 ======================================================= */
 .delete-artist-btn {
-    background-color: #ff6347;
+    background-color: #b48883;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -421,7 +421,7 @@ button:not(:disabled):active {
 }
 
 .delete-artist-btn:hover {
-    background-color: #e74c3c;
+    background-color: #9c7873;
 }
 
 /* ====================================================
@@ -493,4 +493,11 @@ button:not(:disabled):active {
     border-bottom: 1px dashed #bdc3c7;
     padding: 5px 0;
     background-color: #f9f9f9;
+}
+
+/* ====================================================
+   Override: Make Labels in Current Artist Section Normal Weight
+======================================================= */
+#current-artist-section .summary-label {
+    font-weight: normal;
 }
