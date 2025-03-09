@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Animation Review Tool</title>
+  <!-- Added Google Fonts for a modern, clean look -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
@@ -47,24 +49,39 @@
       <section id="current-artist-section">
         <h2>Current Artist</h2>
         <div class="current-artist-info">
-          <div>Current Artist: <span id="current-artist-name"></span></div>
-          <div>Time Elapsed: <span id="current-artist-time-elapsed">00:00</span></div>
-          <div>Time Remaining: <span id="current-artist-est-time-rem">00:00</span></div>
+          <div>Current: <span id="current-artist-name"></span></div>
+          <div>Elapsed: <span id="current-artist-time-elapsed">00:00</span></div>
+          <div>Remaining: <span id="current-artist-est-time-rem">00:00</span></div>
         </div>
         <button id="next-shot-btn" disabled>Next Shot</button>
         <button id="next-artist-btn" disabled>Next Artist</button>
         <button id="undo-btn" disabled>Undo</button>
       </section>
 
-      <section id="real-time-tracking-section">
-        <h2>SUMMARY TOTALS</h2>
-        <div class="summary-stack">
-          <div><span class="summary-label">Total Shots:</span> <span id="total-shots-display">0</span></div>
-          <div><span class="summary-label">Time:</span> <span id="total-time-remaining-display">00:00</span></div>
-          <div><span class="summary-label">People:</span> <span id="total-people-remaining-display">0</span></div>
-          <div><span class="summary-label">Shots:</span> <span id="total-shots-remaining-display">0</span></div>
-        </div>
-      </section>
+<section id="real-time-tracking-section">
+  <h2>SUMMARY</h2>
+  <div class="summary-stack">
+    <div>
+      <span class="summary-label">Total Shots:</span>
+      <span id="total-shots-display">0</span>
+    </div>
+    <!-- New separator added below -->
+    <div class="separator">TOTAL REMAINING</div>
+    <div>
+      <span class="summary-label">Time:</span>
+      <span id="total-time-remaining-display">00:00</span>
+    </div>
+    <div>
+      <span class="summary-label">People:</span>
+      <span id="total-people-remaining-display">0</span>
+    </div>
+    <div>
+      <span class="summary-label">Shots:</span>
+      <span id="total-shots-remaining-display">0</span>
+    </div>
+  </div>
+</section>
+
     </div>
   </div>
 
