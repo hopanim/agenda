@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseBtn.textContent = state.paused ? "Resume" : "Edit Artists";
         // Change color based on paused state:
         // When paused, use orange; otherwise, revert to gray.
-        pauseBtn.style.backgroundColor = state.paused ? "#dbac47" : "gray";
+        pauseBtn.style.backgroundColor = state.paused ? "#dbac47" : "#bdc3c7";
         if (!state.paused) {
             updateDisplay();
         }
