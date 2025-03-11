@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const setCurrentTimeBtn = document.getElementById('set-current-time-btn');
     const pauseBtn = document.getElementById('pause-btn'); // New Pause button
     const undoBtn = document.getElementById('undo-btn'); // NEW Undo button
+    const toggleShotsModeBtn = document.getElementById('toggle-shots-mode'); // NEW Toggle button
 
     const totalShotsDisplay = document.getElementById('total-shots-display');
     const totalTimeRemainingDisplay = document.getElementById('total-time-remaining-display');
@@ -20,6 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentArtistNameDisplay = document.getElementById('current-artist-name');
     const currentArtistTimeElapsedDisplay = document.getElementById('current-artist-time-elapsed');
     const currentArtistEstTimeRemDisplay = document.getElementById('current-artist-est-time-rem');
+
+    // --- Toggle Flag ---
+    // When true, include the active artist's shots (original behavior).
+    // When false (default), exclude the active artist's shots.
+    let includeActive = false;
+    // Set the button's default appearance to inactive (gray)
+    toggleShotsModeBtn.classList.add('inactive');
 
     // --- State ---
     let state = {
@@ -271,6 +279,16 @@ document.addEventListener('DOMContentLoaded', () => {
             artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
     }
 
+    // Calculate total shots remaining excluding the current active artist.
+    function calculateTotalShotsRemainingExcludingCurrent() {
+        let total = state.artists.reduce((sum, artist) =>
+            artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
+        if (state.currentArtistIndex !== -1 && !state.artists[state.currentArtistIndex].completed) {
+            total -= parseInt(state.artists[state.currentArtistIndex].shots, 10);
+        }
+        return total;
+    }
+
     function calculateTotalPeopleRemaining() {
         let count = state.artists.reduce((sum, artist) => artist.completed ? sum : sum + 1, 0);
         if (state.currentArtistIndex !== -1 && !state.artists[state.currentArtistIndex].completed) {
@@ -458,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDisplay() {
-        const totalShotsRemaining = calculateTotalShotsRemaining();
+        // Update People Remaining as before.
         const totalPeopleRemaining = calculateTotalPeopleRemaining();
         // If the session has started, use the captured initial total shots.
         if (state.sessionStarted) {
@@ -467,7 +485,12 @@ document.addEventListener('DOMContentLoaded', () => {
             totalShotsDisplay.textContent = calculateTotalShots();
         }
         totalTimeRemainingDisplay.textContent = formatTime(state.totalTimeRemaining);
-        totalShotsRemainingDisplay.textContent = totalShotsRemaining;
+        // Use the toggle flag to decide which shots remaining value to display.
+        // When includeActive is true, we use the original calculation (includes active artist).
+        // When false, we exclude the active artist's shots.
+        totalShotsRemainingDisplay.textContent = includeActive
+            ? calculateTotalShotsRemaining()
+            : calculateTotalShotsRemainingExcludingCurrent();
         totalPeopleRemainingDisplay.textContent = totalPeopleRemaining;
         calculateEstimatedTimePerArtist();
         // Only update the artist list if not paused
@@ -505,6 +528,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSortableDraggability();
         totalArtistsInput.disabled = state.sessionStarted;
     }
+
+    // --- Toggle Button Event Listener ---
+    toggleShotsModeBtn.addEventListener('click', () => {
+        includeActive = !includeActive;
+        // When includeActive is true, button appears active (green);
+        // when false, it appears inactive (gray).
+        if (includeActive) {
+            toggleShotsModeBtn.classList.remove('inactive');
+        } else {
+            toggleShotsModeBtn.classList.add('inactive');
+        }
+        updateDisplay();
+    });
 
     // --- Pause Button Event Listener ---
     pauseBtn.addEventListener('click', () => {

@@ -501,3 +501,20 @@ button:not(:disabled):active {
 #current-artist-section .summary-label {
     font-weight: normal;
 }
+
+/* ====================================================
+   Toggle Button Styles
+======================================================= */
+.toggle-button {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+    background-color: #368d92; /* Active color: include active artist's shots */
+}
+
+.toggle-button.inactive {
+    background-color: #bdc3c7; /* Inactive color: exclude active artist's shots */
+}
