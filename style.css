@@ -21,6 +21,12 @@ h1, h2 {
     color: #34495e;
 }
 
+/* Remove extra top margin from section headings */
+section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
 /* ====================================================
    Sections
 ======================================================= */
@@ -33,11 +39,18 @@ section {
 }
 
 /* ----------------------------------------------------
-   Override for Agenda Setup and Agenda Management Sections
+   Agenda Setup and Agenda Management Sections
 -------------------------------------------------------- */
-#setup-section,
+/* Agenda Setup Section */
+#setup-section {
+    background-color: #f0f0f0;
+    max-width: 200px;
+}
+
+/* Agenda Management Section */
 #agenda-management-section {
     background-color: #f0f0f0;
+    min-width: 460px;
 }
 
 /* ----------------------------------------------------
@@ -218,6 +231,25 @@ section {
 #artist-agenda-list.sortable-ghost {
     opacity: 0.7;
     background: #d5f5e3;
+}
+
+/* ====================================================
+   Time Permitting Line Styles
+======================================================= */
+#artist-agenda-list li.time-permitting-line {
+    background-color: #ffeeba;
+    border: 2px dashed #f39c12;
+    text-align: center;
+    font-weight: bold;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#artist-agenda-list li.time-permitting-line .move-artist-btn {
+    width: 16px;
+    height: 16px;
 }
 
 /* ====================================================
@@ -512,9 +544,68 @@ button:not(:disabled):active {
     border: none;
     cursor: pointer;
     margin-left: 10px;
-    background-color: #368d92; /* Active color: include active artist's shots */
+    background-color: #368d92;
 }
 
 .toggle-button.inactive {
-    background-color: #bdc3c7; /* Inactive color: exclude active artist's shots */
+    background-color: #bdc3c7;
+}
+
+#artist-agenda-list li.below-divider {
+    background-color: #f1f1f1;
+}
+
+#artist-agenda-list li.below-divider .delete-artist-btn {
+    background-color: #e3e3e3;
+}
+#artist-agenda-list li.below-divider .delete-artist-btn:hover {
+    background-color: #c4a9a5;
+}
+
+#total-artists:disabled {
+  background-color: #eee;
+  color: #888;
+}
+
+/* Container for the toggle button - ensure items align to the left */
+.input-group.inline-toggle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Style for the Time Permitting toggle button */
+#time-permitting-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 15px;
+  min-width: 125px;
+  white-space: nowrap;
+  border: none;
+  border-radius: 5px;
+  background-color: #919597;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin: 0;
+}
+
+#time-permitting-toggle.active {
+  background-color: #908155;
+}
+
+#total-artists {
+  width: 35px;
+}
+
+/* ====================================================
+   Additional Style for Negative Time Display
+======================================================= */
+#total-time-remaining-display.negative-time,
+#tp-total-time-remaining-display.negative-time,
+#current-artist-est-time-rem.negative-time,
+#tp-current-artist-est-time-rem.negative-time {
+    color: #e74c3c;
+    font-weight: bold;
 }
