@@ -13,6 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const undoBtn = document.getElementById('undo-btn'); // Undo button
     const toggleShotsModeBtn = document.getElementById('toggle-shots-mode'); // Shots mode toggle button
 
+    // New Simplified Section DOM Elements
+    const simpleCurrentArtistDisplay = document.getElementById('simple-current-artist');
+    const simpleCurrentTimeElapsedDisplay = document.getElementById('simple-current-time-elapsed');
+    const simpleCurrentTimeRemainingDisplay = document.getElementById('simple-current-time-remaining');
+    const simpleTotalTimeRemainingDisplay = document.getElementById('simple-total-time-remaining');
+    const simplePeopleRemainingDisplay = document.getElementById('simple-people-remaining');
+    const simpleShotsRemainingDisplay = document.getElementById('simple-shots-remaining');
+    const simpleToggleShotsModeBtn = document.getElementById('simple-toggle-shots-mode');
+    const simpleNextShotBtn = document.getElementById('simple-next-shot-btn');
+    const simpleNextArtistBtn = document.getElementById('simple-next-artist-btn');
+    const simpleUndoBtn = document.getElementById('simple-undo-btn');
+
     // Reference for the new Time Permitting toggle button in the agenda setup
     const timePermittingToggle = document.getElementById('time-permitting-toggle');
 
@@ -63,6 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sortable instance for artist list
     let sortableInstance = null;
+
+    // --- Event Listeners for Simplified Section Buttons ---
+    simpleNextShotBtn.addEventListener('click', () => {
+        nextShotBtn.click();
+    });
+    simpleNextArtistBtn.addEventListener('click', () => {
+        nextArtistBtn.click();
+    });
+    simpleUndoBtn.addEventListener('click', () => {
+        undoBtn.click();
+    });
+    simpleToggleShotsModeBtn.addEventListener('click', () => {
+        toggleShotsModeBtn.click();
+    });
 
     // --- User Data ---
     const users = [
@@ -339,9 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (artist.completed) {
                     artist.estimatedTime = "Done";
                 } else {
-                    // For the active artist, we do not update their estimatedTime so as to preserve their fixed allotment.
                     if (state.currentArtistIndex !== -1 && state.artists[state.currentArtistIndex].id === artist.id) {
-                        // Leave the estimatedTime unchanged.
+                        // Leave the estimatedTime unchanged for the active artist.
                     } else {
                         artist.estimatedTime = formatTime(remainingTimePerShot * parseInt(artist.shots, 10));
                     }
@@ -388,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
         artistAgendaList.innerHTML = '';
         const fragment = document.createDocumentFragment();
         for (let i = 0; i < state.artists.length; i++) {
-            // Only insert divider if Time Permitting is enabled.
             if (state.timePermittingEnabled && i === state.timePermittingIndex) {
                 fragment.appendChild(createTimePermittingLineItem());
             }
@@ -396,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const listItem = document.createElement('li');
             listItem.dataset.id = artist.id;
             
-            // When Time Permitting is disabled, all artists are prioritized.
             if (state.timePermittingEnabled) {
                 if (i >= state.timePermittingIndex) {
                     listItem.classList.add('below-divider');
@@ -448,18 +471,17 @@ document.addEventListener('DOMContentLoaded', () => {
             shotsInput.min = '1';
             shotsDiv.appendChild(shotsInput);
 
-        // For active artist, dynamically calculate remaining time based on fixed tpEstimatedTime.
-        const estimatedTimeSpan = document.createElement('span');
-        if (state.sessionStarted && state.currentArtistIndex === i) {
-            const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
-            const estimatedTimeInSeconds = timeToSeconds(artist.tpEstimatedTime || "00:00");
-            const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
-            estimatedTimeSpan.textContent = formatTime(remainingEstTimeForCurrent);
-            estimatedTimeSpan.className = `estimated-time ${remainingEstTimeForCurrent < 0 ? 'negative-time' : ''}`;
-        } else {
-            estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
-            estimatedTimeSpan.textContent = artist.estimatedTime;
-        }
+            const estimatedTimeSpan = document.createElement('span');
+            if (state.sessionStarted && state.currentArtistIndex === i) {
+                const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
+                const estimatedTimeInSeconds = timeToSeconds(artist.tpEstimatedTime || "00:00");
+                const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
+                estimatedTimeSpan.textContent = formatTime(remainingEstTimeForCurrent);
+                estimatedTimeSpan.className = `estimated-time ${remainingEstTimeForCurrent < 0 ? 'negative-time' : ''}`;
+            } else {
+                estimatedTimeSpan.className = `estimated-time ${artist.estimatedTime.startsWith('-') ? 'negative-time' : ''}`;
+                estimatedTimeSpan.textContent = artist.estimatedTime;
+            }
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-artist-btn';
@@ -525,7 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             fragment.appendChild(listItem);
         }
-        // If Time Permitting is enabled and the divider index is at the end, add it.
         if (state.timePermittingEnabled && state.timePermittingIndex >= state.artists.length) {
             fragment.appendChild(createTimePermittingLineItem());
         }
@@ -535,7 +556,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nameInputs.forEach(input => autocomplete(input, users));
     }
 
-    // Create the divider (Time Permitting Line) only if enabled.
     function createTimePermittingLineItem() {
         const lineItem = document.createElement('li');
         lineItem.className = 'time-permitting-line';
@@ -575,13 +595,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return lineItem;
     }
 
+// ... existing code remains unchanged
+
 function updateDisplay() {
-    // Determine prioritized artists based on Time Permitting setting.
     const prioritizedArtists = state.timePermittingEnabled 
         ? state.artists.slice(0, state.timePermittingIndex) 
         : state.artists;
         
-    // Always display the total shots for prioritized artists.
+    // Update totals in the main summary section
     const prioritizedTotalShots = prioritizedArtists.reduce((sum, artist) => sum + parseInt(artist.shots, 10), 0);
     totalShotsDisplay.textContent = prioritizedTotalShots;
 
@@ -592,13 +613,11 @@ function updateDisplay() {
         totalTimeRemainingDisplay.classList.remove('negative-time');
     }
 
-    // Calculate remaining shots for prioritized artists.
     let prioritizedShotsRemaining = prioritizedArtists.reduce((sum, artist) =>
         artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
     if (state.currentArtistIndex !== -1 && state.currentArtistIndex < prioritizedArtists.length && !state.artists[state.currentArtistIndex].completed) {
         const activeArtist = state.artists[state.currentArtistIndex];
         if (includeActive) {
-            // Subtract full shots then add back remaining shots (accounting for shotsDone).
             const shotsDone = activeArtist.shotsDone || 0;
             prioritizedShotsRemaining -= parseInt(activeArtist.shots, 10);
             prioritizedShotsRemaining += (parseInt(activeArtist.shots, 10) - shotsDone);
@@ -607,8 +626,7 @@ function updateDisplay() {
         }
     }
     totalShotsRemainingDisplay.textContent = prioritizedShotsRemaining;
-
-    // Calculate remaining people (artists) in the prioritized section.
+    
     let prioritizedPeopleRemaining = prioritizedArtists.reduce((sum, artist) => artist.completed ? sum : sum + 1, 0);
     if (state.currentArtistIndex !== -1 && !state.artists[state.currentArtistIndex].completed) {
         if (!state.timePermittingEnabled || state.currentArtistIndex < state.timePermittingIndex) {
@@ -616,23 +634,22 @@ function updateDisplay() {
         }
     }
     totalPeopleRemainingDisplay.textContent = prioritizedPeopleRemaining;
-
+    
     calculateEstimatedTimePerArtist();
     calculateTimePermittingEstimates();
-
+    
     if (!state.paused) {
         renderArtistList();
     }
-
+    
+    // Update current artist display in the main section
     if (state.currentArtistIndex !== -1 && state.currentArtistIndex < prioritizedArtists.length) {
         const currentArtist = state.artists[state.currentArtistIndex];
-        // Display remaining shots as (remaining/total)
         const shotsDone = currentArtist.shotsDone || 0;
         const remainingShots = currentArtist.shots - shotsDone;
         currentArtistNameDisplay.textContent = currentArtist.name + " (" + remainingShots + "/" + currentArtist.shots + ")";
         const elapsedTime = Math.floor((Date.now() - state.currentArtistStartTime) / 1000);
         currentArtistTimeElapsedDisplay.textContent = formatTime(elapsedTime);
-            // Use the fixed time permitting estimate (calculated when the artist became active)
         const estimatedTimeInSeconds = timeToSeconds(currentArtist.tpEstimatedTime || "00:00");
         const remainingEstTimeForCurrent = estimatedTimeInSeconds - elapsedTime;
         currentArtistEstTimeRemDisplay.textContent = formatTime(remainingEstTimeForCurrent);
@@ -646,8 +663,7 @@ function updateDisplay() {
         currentArtistTimeElapsedDisplay.textContent = '00:00';
         currentArtistEstTimeRemDisplay.textContent = '00:00';
     }
-
-    // Disable Next Shot if the active artist has one or fewer remaining shots.
+    
     if (state.currentArtistIndex === -1 ||
         state.artists[state.currentArtistIndex].completed ||
         (state.artists[state.currentArtistIndex].shots - (state.artists[state.currentArtistIndex].shotsDone || 0)) <= 1) {
@@ -655,12 +671,131 @@ function updateDisplay() {
     } else {
         nextShotBtn.disabled = false;
     }
+    
     updateSortableDraggability();
     totalArtistsInput.disabled = state.sessionStarted;
     if (state.timePermittingEnabled) {
         updateTimePermittingDisplay();
     }
+    
+    // --- Update Simplified Section ---
+    // Update the current artist row (first row) in the simplified section.
+    // It now displays the artist's name along with the remaining shots as a single number.
+    // Also update the dedicated progress bar for the current artist's shots.
+    if (state.currentArtistIndex !== -1 && state.currentArtistIndex < prioritizedArtists.length) {
+        const currentArtist = state.artists[state.currentArtistIndex];
+        const shotsDone = currentArtist.shotsDone || 0;
+        const remainingShots = currentArtist.shots - shotsDone;
+        // Update current artist info: display artist's name and remaining shots.
+        const simpleCurrentShotsEl = document.getElementById('simple-current-shots');
+        if (simpleCurrentShotsEl) {
+            simpleCurrentShotsEl.textContent = currentArtist.name + " (" + remainingShots + ")";
+        }
+        // Update current artist's progress bar for shots (remaining/total)
+        const progressCurrentEl = document.getElementById('progress-current');
+        if (progressCurrentEl) {
+            if (currentArtist.shots > 0) {
+                let progressCurrentPercent = (remainingShots / currentArtist.shots) * 100;
+                progressCurrentEl.style.width = Math.max(0, Math.min(100, progressCurrentPercent)) + '%';
+            } else {
+                progressCurrentEl.style.width = '0%';
+            }
+        }
+    } else {
+        const simpleCurrentShotsEl = document.getElementById('simple-current-shots');
+        if (simpleCurrentShotsEl) {
+            simpleCurrentShotsEl.textContent = '0';
+        }
+        const progressCurrentEl = document.getElementById('progress-current');
+        if (progressCurrentEl) {
+            progressCurrentEl.style.width = '0%';
+        }
+    }
+    
+    // Mirror the other simplified section values
+    const simpleCurrentTimeElapsedDisplay = document.getElementById('simple-current-time-elapsed');
+    const simpleCurrentTimeRemainingDisplay = document.getElementById('simple-current-time-remaining');
+    const simpleTotalTimeRemainingDisplay = document.getElementById('simple-total-time-remaining');
+    const simplePeopleRemainingDisplay = document.getElementById('simple-people-remaining');
+    const simpleShotsRemainingDisplay = document.getElementById('simple-shots-remaining');
+    const simpleToggleShotsModeBtn = document.getElementById('simple-toggle-shots-mode');
+    
+    if (simpleCurrentTimeElapsedDisplay) {
+        simpleCurrentTimeElapsedDisplay.textContent = currentArtistTimeElapsedDisplay.textContent;
+    }
+    if (simpleCurrentTimeRemainingDisplay) {
+        simpleCurrentTimeRemainingDisplay.textContent = currentArtistEstTimeRemDisplay.textContent;
+    }
+    if (simpleTotalTimeRemainingDisplay) {
+        simpleTotalTimeRemainingDisplay.textContent = totalTimeRemainingDisplay.textContent;
+        if (state.totalTimeRemaining < 0) {
+            simpleTotalTimeRemainingDisplay.classList.add('negative-time');
+        } else {
+            simpleTotalTimeRemainingDisplay.classList.remove('negative-time');
+        }
+    }
+    if (simplePeopleRemainingDisplay) {
+        simplePeopleRemainingDisplay.textContent = totalPeopleRemainingDisplay.textContent;
+    }
+    if (simpleShotsRemainingDisplay) {
+        simpleShotsRemainingDisplay.textContent = totalShotsRemainingDisplay.textContent;
+    }
+    if (simpleToggleShotsModeBtn) {
+        if (toggleShotsModeBtn.classList.contains('inactive')) {
+            simpleToggleShotsModeBtn.classList.add('inactive');
+            simpleToggleShotsModeBtn.classList.remove('active');
+        } else {
+            simpleToggleShotsModeBtn.classList.remove('inactive');
+            simpleToggleShotsModeBtn.classList.add('active');
+        }
+    }
+    
+    // Mirror disabled states for simplified buttons
+    const simpleNextShotBtn = document.getElementById('simple-next-shot-btn');
+    const simpleNextArtistBtn = document.getElementById('simple-next-artist-btn');
+    const simpleUndoBtn = document.getElementById('simple-undo-btn');
+    if (simpleNextShotBtn) {
+        simpleNextShotBtn.disabled = nextShotBtn.disabled;
+    }
+    if (simpleNextArtistBtn) {
+        simpleNextArtistBtn.disabled = nextArtistBtn.disabled;
+    }
+    if (simpleUndoBtn) {
+        simpleUndoBtn.disabled = undoBtn.disabled;
+    }
+    
+    // --- Update Progress Bars for Totals in Simplified Section ---
+    // Total Time Progress (reversed: full at start, empties over time)
+    const progressTotalEl = document.getElementById('progress-total');
+    if (state.totalTimeAllotment > 0) {
+        let progressTotalPercent = (state.totalTimeRemaining / state.totalTimeAllotment) * 100;
+        progressTotalEl.style.width = Math.max(0, Math.min(100, progressTotalPercent)) + '%';
+    } else {
+        progressTotalEl.style.width = '0%';
+    }
+    
+    // People Progress (reversed: full at start, empties as people are processed)
+    const progressPeopleEl = document.getElementById('progress-people');
+    let initialPeople = state.timePermittingEnabled ? state.timePermittingIndex : state.artists.length;
+    if (initialPeople > 0) {
+        let currentPeopleRemaining = parseInt(totalPeopleRemainingDisplay.textContent, 10);
+        let progressPeoplePercent = (currentPeopleRemaining / initialPeople) * 100;
+        progressPeopleEl.style.width = Math.max(0, Math.min(100, progressPeoplePercent)) + '%';
+    } else {
+        progressPeopleEl.style.width = '0%';
+    }
+    
+    // Shots Progress (reversed: full at start, empties as shots are completed)
+    const progressShotsEl = document.getElementById('progress-shots');
+    if (state.initialTotalShots > 0) {
+        let currentShotsRemaining = parseInt(totalShotsRemainingDisplay.textContent, 10);
+        let progressShotsPercent = (currentShotsRemaining / state.initialTotalShots) * 100;
+        progressShotsEl.style.width = Math.max(0, Math.min(100, progressShotsPercent)) + '%';
+    } else {
+        progressShotsEl.style.width = '0%';
+    }
 }
+
 
 
 
@@ -704,7 +839,6 @@ function updateDisplay() {
         }
     }
 
-    // --- Toggle Shots Mode (for summary section) ---
     toggleShotsModeBtn.addEventListener('click', () => {
         includeActive = !includeActive;
         if (includeActive) {
@@ -715,7 +849,6 @@ function updateDisplay() {
         updateDisplay();
     });
 
-    // --- Pause Button ---
     pauseBtn.addEventListener('click', () => {
         state.paused = !state.paused;
         pauseBtn.textContent = state.paused ? "Resume" : "Edit Agenda";
@@ -730,7 +863,7 @@ function updateDisplay() {
         state.artists = Array.from({ length: numArtists }, (_, i) => ({
             id: Date.now() + i,
             name: `Artist ${i + 1}`,
-            shots: 1, // original allocated shots (remains fixed)
+            shots: 1,
             estimatedTime: "00:00",
             tpEstimatedTime: "00:00",
             completed: false
@@ -744,7 +877,6 @@ function updateDisplay() {
         updateDisplay();
     }
 
-    // --- Session Timer --- 
     function startSessionTimer() {
         state.sessionStartTime = Date.now();
         state.timerInterval = setInterval(() => {
@@ -768,7 +900,6 @@ function updateDisplay() {
         }
     }
 
-    // --- Next Artist ---
     function nextArtist() {
         undoBackup = { previousIndex: state.currentArtistIndex };
         undoBtn.disabled = false;
@@ -778,18 +909,15 @@ function updateDisplay() {
         }
         state.currentArtistIndex++;
         
-        // Automatically adjust the time permitting divider so it remains after the current active artist.
         if (state.timePermittingEnabled && state.currentArtistIndex >= state.timePermittingIndex) {
              state.timePermittingIndex = Math.min(state.currentArtistIndex + 1, state.artists.length);
         }
         
         if (state.currentArtistIndex < state.artists.length) {
             const currentArtist = state.artists[state.currentArtistIndex];
-            // Initialize shotsDone for the active artist
             if (currentArtist.shotsDone === undefined) {
                 currentArtist.shotsDone = 0;
             }
-            // Fix the active artist's time allotment once (using full shot count)
             const prioritizedArtists = state.timePermittingEnabled 
                 ? state.artists.slice(0, state.timePermittingIndex) 
                 : state.artists;
@@ -812,39 +940,33 @@ function updateDisplay() {
         updateDisplay();
     }
 
-    // --- Undo Button ---
-// --- Undo Button ---
-undoBtn.addEventListener('click', () => {
-    if (!undoBackup) return;
-    stopCurrentArtistTimer();
-    state.currentArtistIndex = undoBackup.previousIndex;
-    if (state.currentArtistIndex !== -1) {
-        state.artists[state.currentArtistIndex].completed = false;
-        const currentArtist = state.artists[state.currentArtistIndex];
-        // Recalculate fixed estimated time for the active artist
-        const prioritizedArtists = state.timePermittingEnabled 
-            ? state.artists.slice(0, state.timePermittingIndex) 
-            : state.artists;
-        const totalRemainingShots = prioritizedArtists.reduce((sum, artist) =>
-            artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
-        if (totalRemainingShots > 0) {
-            const remainingTimePerShot = state.totalTimeRemaining / totalRemainingShots;
-            currentArtist.tpEstimatedTime = formatTime(remainingTimePerShot * parseInt(currentArtist.shots, 10));
-        } else {
-            currentArtist.tpEstimatedTime = "00:00";
+    undoBtn.addEventListener('click', () => {
+        if (!undoBackup) return;
+        stopCurrentArtistTimer();
+        state.currentArtistIndex = undoBackup.previousIndex;
+        if (state.currentArtistIndex !== -1) {
+            state.artists[state.currentArtistIndex].completed = false;
+            const currentArtist = state.artists[state.currentArtistIndex];
+            const prioritizedArtists = state.timePermittingEnabled 
+                ? state.artists.slice(0, state.timePermittingIndex) 
+                : state.artists;
+            const totalRemainingShots = prioritizedArtists.reduce((sum, artist) =>
+                artist.completed ? sum : sum + parseInt(artist.shots, 10), 0);
+            if (totalRemainingShots > 0) {
+                const remainingTimePerShot = state.totalTimeRemaining / totalRemainingShots;
+                currentArtist.tpEstimatedTime = formatTime(remainingTimePerShot * parseInt(currentArtist.shots, 10));
+            } else {
+                currentArtist.tpEstimatedTime = "00:00";
+            }
+            startCurrentArtistTimer();
         }
-        startCurrentArtistTimer();
-    }
-    state.sessionStarted = true;
-    nextArtistBtn.disabled = false;
-    undoBackup = null;
-    undoBtn.disabled = true;
-    updateDisplay();
-});
+        state.sessionStarted = true;
+        nextArtistBtn.disabled = false;
+        undoBackup = null;
+        undoBtn.disabled = true;
+        updateDisplay();
+    });
 
-
-    // --- Next Shot Button --- 
-    // Instead of subtracting from the artist's shot count, we track completed shots separately.
     nextShotBtn.addEventListener('click', () => {
         if (state.currentArtistIndex === -1) return;
         const currentArtist = state.artists[state.currentArtistIndex];
@@ -902,7 +1024,6 @@ undoBtn.addEventListener('click', () => {
         updateDisplay();
     }
 
-    // --- Move Artist Function ---
     function moveArtist(artistId, direction) {
         const currentIndex = state.artists.findIndex(artist => artist.id === artistId);
         if (currentIndex === -1) return;
@@ -935,14 +1056,12 @@ undoBtn.addEventListener('click', () => {
         updateDisplay();
     }
 
-    // --- Update Sortable Draggability ---
     function updateSortableDraggability() {
         if (sortableInstance) {
             sortableInstance.option('draggable', 'li');
         }
     }
 
-    // --- Event Listeners ---
     totalArtistsInput.addEventListener('change', initializeArtists);
     startTimeInput.addEventListener('change', () => {
         state.startTime = startTimeInput.value;
@@ -971,7 +1090,6 @@ undoBtn.addEventListener('click', () => {
     nextArtistBtn.addEventListener('click', nextArtist);
     addArtistBtn.addEventListener('click', addArtist);
 
-    // --- Time Permitting Toggle Button Listener ---
     timePermittingToggle.addEventListener('click', () => {
         state.timePermittingEnabled = !state.timePermittingEnabled;
         if (state.timePermittingEnabled) {
@@ -985,7 +1103,6 @@ undoBtn.addEventListener('click', () => {
         updateDisplay();
     });
 
-    // Initialize Sortable
     sortableInstance = Sortable.create(artistAgendaList, {
         draggable: 'li',
         group: {
@@ -1056,7 +1173,6 @@ undoBtn.addEventListener('click', () => {
         state.initialTotalShots = calculateTotalShots();
         state.sessionStarted = true;
         state.currentArtistIndex = 0;
-        // For the first artist, initialize shotsDone and fix their tpEstimatedTime.
         const currentArtist = state.artists[state.currentArtistIndex];
         currentArtist.shotsDone = 0;
         const prioritizedArtists = state.timePermittingEnabled 

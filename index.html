@@ -30,10 +30,9 @@
           <input type="time" id="end-time" value="10:00" step="900">
         </div>
         <!-- New Checkbox for Time Permitting -->
-<div class="input-group inline-toggle">
-  <button type="button" id="time-permitting-toggle" class="toggle-button inactive">Time Permitting</button>
-</div>
-
+        <div class="input-group inline-toggle">
+          <button type="button" id="time-permitting-toggle" class="toggle-button inactive">Time Permitting</button>
+        </div>
       </section>
 
       <section id="agenda-management-section">
@@ -79,7 +78,7 @@
             <span class="summary-label">Total Shots:</span>
             <span id="total-shots-display">0</span>
           </div>
-          <!-- New separator added below -->
+          <!-- Divider in Summary Section -->
           <div class="separator">TOTAL REMAINING</div>
           <div>
             <span class="summary-label">Time:</span>
@@ -98,6 +97,86 @@
         </div>
       </section>
     </div>
+
+<!-- Updated Simplified Section with Buttons Above the Grid and Current Row Split into 3 Cells -->
+<section id="simplified-section">
+  <h2>REVIEW</h2>
+  <div class="simple-buttons">
+    <button id="simple-next-shot-btn">></button>
+    <button id="simple-next-artist-btn">>></button>
+    <button id="simple-undo-btn"><</button>
+  </div>
+  <div class="simple-grid">
+    <!-- Row 1: Current Artist's Shots (new) -->
+    <div class="grid-col label-col">
+      <span class="simple-label">Current:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-current-shots">0</span>
+    </div>
+    <div class="grid-col progress-col">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-current"></div>
+      </div>
+    </div>
+    <!-- Row 2: Elapsed Time -->
+    <div class="grid-col label-col">
+      <span class="simple-label">Elapsed:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-current-time-elapsed">00:00</span>
+    </div>
+    <div class="grid-col progress-col"></div>
+    <!-- Row 3: Remaining Time -->
+    <div class="grid-col label-col">
+      <span class="simple-label">Remaining:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-current-time-remaining">00:00</span>
+    </div>
+    <div class="grid-col progress-col"></div>
+    <!-- Divider Row: TOTAL REMAINING -->
+    <div class="grid-col separator" style="grid-column: 1 / span 3;">TOTAL REMAINING</div>
+    <!-- Row 4: Total Review Time -->
+    <div class="grid-col label-col">
+      <span class="simple-label">Total:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-total-time-remaining">00:00</span>
+    </div>
+    <div class="grid-col progress-col">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-total"></div>
+      </div>
+    </div>
+    <!-- Row 5: People -->
+    <div class="grid-col label-col">
+      <span class="simple-label">People:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-people-remaining">0</span>
+    </div>
+    <div class="grid-col progress-col">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-people"></div>
+      </div>
+    </div>
+    <!-- Row 6: Shots (Review Totals) -->
+    <div class="grid-col label-col">
+      <span class="simple-label">Shots:</span>
+    </div>
+    <div class="grid-col info-col">
+      <span id="simple-shots-remaining">0</span>
+      <button id="simple-toggle-shots-mode" class="toggle-button" title="Toggle Shots Mode"></button>
+    </div>
+    <div class="grid-col progress-col">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-shots"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
   </div>
 
   <script src="script.js"></script>
