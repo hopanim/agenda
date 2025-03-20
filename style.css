@@ -631,7 +631,7 @@ button:not(:disabled):active {
      Second column: minmax(150px, max-content) (info) so its left edge remains anchored,
      Third column: minmax(60px, auto) (progress bar) with a minimum width.
   */
-  grid-template-columns: auto minmax(50px, max-content) minmax(100px, auto);
+  grid-template-columns: auto minmax(120px, max-content) minmax(80px, auto);
   gap: 0px;
   align-items: center;
 }
