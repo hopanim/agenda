@@ -70,6 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         timePermittingEnabled: false // default is disabled
     };
 
+	// Pause while drag & dropping
+	let isDragging = false;
+
     // Backup for undo (one step)
     let undoBackup = null;
 
@@ -638,9 +641,13 @@ function updateDisplay() {
     calculateEstimatedTimePerArtist();
     calculateTimePermittingEstimates();
     
-    if (!state.paused) {
-        renderArtistList();
-    }
+if (!state.paused && 
+    !document.querySelector('.artist-name-input:focus, .artist-shots-input:focus') && 
+    !isDragging) {
+  renderArtistList();
+}
+
+
     
     // Update current artist display in the main section
     if (state.currentArtistIndex !== -1 && state.currentArtistIndex < prioritizedArtists.length) {
@@ -1103,13 +1110,22 @@ function updateDisplay() {
         updateDisplay();
     });
 
-    sortableInstance = Sortable.create(artistAgendaList, {
-        draggable: 'li',
-        group: {
-            name: 'artists',
-            pull: true,
-            put: true,
-        },
+sortableInstance = Sortable.create(artistAgendaList, {
+  draggable: 'li',
+  group: {
+    name: 'artists',
+    pull: true,
+    put: true,
+  },
+  onStart: function (evt) {
+    isDragging = true;
+  },
+  onEnd: function (evt) {
+    isDragging = false;
+    // Re-render the list once the drag is complete
+    renderArtistList();
+    updateDisplay();
+  },
         onUpdate: function (evt) {
             const items = Array.from(artistAgendaList.children);
             let dividerDOMIndex = state.timePermittingEnabled ? items.findIndex(item => item.dataset.divider === "true") : -1;

@@ -632,13 +632,13 @@ button:not(:disabled):active {
      Third column: minmax(60px, auto) (progress bar) with a minimum width.
   */
   grid-template-columns: auto minmax(50px, max-content) minmax(100px, auto);
-  gap: 2px;
+  gap: 0px;
   align-items: center;
 }
 
 /* Common grid cell styling */
 .grid-col {
-  padding: 3px;
+  padding: 1px;
 }
 
 .label-col {
@@ -663,7 +663,7 @@ button:not(:disabled):active {
   font-weight: bold;
   border-top: 1px dashed #bdc3c7;
   border-bottom: 1px dashed #bdc3c7;
-  padding: 5px 0;
+  padding: 0px 0;
   background-color: #f9f9f9;
 }
 
