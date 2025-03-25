@@ -631,14 +631,14 @@ button:not(:disabled):active {
      Second column: minmax(150px, max-content) (info) so its left edge remains anchored,
      Third column: minmax(60px, auto) (progress bar) with a minimum width.
   */
-  grid-template-columns: auto minmax(120px, max-content) minmax(80px, auto);
-  gap: 0px;
+  grid-template-columns: auto minmax(50px, max-content) minmax(100px, auto);
+  gap: 2px;
   align-items: center;
 }
 
 /* Common grid cell styling */
 .grid-col {
-  padding: 1px;
+  padding: 2px;
 }
 
 .label-col {
@@ -663,7 +663,7 @@ button:not(:disabled):active {
   font-weight: bold;
   border-top: 1px dashed #bdc3c7;
   border-bottom: 1px dashed #bdc3c7;
-  padding: 0px 0;
+  padding: 0.5px 0;
   background-color: #f9f9f9;
 }
 
@@ -674,9 +674,9 @@ button:not(:disabled):active {
 }
 
 .simple-buttons button {
-  padding: 3px 8px;
+  padding: 4px 14px;
   margin: 0 1px;
-  font-size: 0.5em;
+  font-size: 0.7em;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -716,15 +716,85 @@ button:not(:disabled):active {
   border-radius: 5px;
   margin-top: 5px;
   overflow: hidden;
+  position: relative;
 }
 
+/* Updated: Align progress text to the left */
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  color: #2c3e50;
+  font-weight: bold;
+  pointer-events: none;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Optional: If you want a progress bar to be visible */
 .progress-bar {
   height: 100%;
   width: 0;
-  background-color: #00bcd4;
+  background-color: #88d0da;
   border-radius: 5px;
   transition: width 0.3s ease;
 }
 
+.progress-text.negative-time {
+  color: #e74c3c;
+  font-weight: bold;
+}
 
 
+/* NEW: Hide elements with the hidden class */
+.hidden {
+  display: none;
+}
+
+/* Optional: Basic styling for the view toggle container */
+.view-toggle {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.view-toggle button {
+  padding: 8px 16px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #368d92;
+  color: white;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+.view-toggle button:hover {
+  background-color: #2a6b73;
+}
+
+/* New two-column grid layout for simplified section */
+.simple-grid.two-column {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Ensure the progress info column fills its space */
+.progress-info-col {
+  position: relative;
+}
+
+/* Adjust the progress container to be the relative wrapper */
+.progress-container {
+  position: relative;
+  height: 20px; /* adjust as needed */
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* Position the dynamic text overlay in the center */
+/* (Updated above in .progress-text) */

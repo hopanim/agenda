@@ -49,7 +49,14 @@
       </section>
     </div>
 
-    <div class="bottom-section-container">
+    <!-- NEW: View Toggle Section (switched order: Simplified first) -->
+    <div id="view-toggle-section" class="view-toggle">
+      <button id="show-simplified-btn">1</button>
+      <button id="show-detailed-btn">2</button>
+    </div>
+
+    <!-- Detailed View Container (hidden by default) -->
+    <div class="bottom-section-container" style="display: none;">
       <section id="current-artist-section">
         <h2>CURRENT ARTIST</h2>
         <div class="current-artist-info">
@@ -78,7 +85,6 @@
             <span class="summary-label">Total Shots:</span>
             <span id="total-shots-display">0</span>
           </div>
-          <!-- Divider in Summary Section -->
           <div class="separator">TOTAL REMAINING</div>
           <div>
             <span class="summary-label">Time:</span>
@@ -91,94 +97,97 @@
           <div>
             <span class="summary-label">Shots:</span>
             <span id="total-shots-remaining-display">0</span>
-            <!-- Toggle button for shots mode -->
             <button id="toggle-shots-mode" class="toggle-button" title="Toggle Shots Mode"></button>
           </div>
         </div>
       </section>
     </div>
 
-<!-- Updated Simplified Section with Buttons Above the Grid and Current Row Split into 3 Cells -->
-<section id="simplified-section">
-  <h2>REVIEW</h2>
-  <div class="simple-buttons">
-    <button id="simple-next-shot-btn">></button>
-    <button id="simple-next-artist-btn">>></button>
-    <button id="simple-undo-btn"><</button>
-  </div>
-  <div class="simple-grid">
-    <!-- Row 1: Current Artist's Shots (new) -->
-    <div class="grid-col label-col">
-      <span class="simple-label">Current:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-current-shots">0</span>
-    </div>
-    <div class="grid-col progress-col">
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-current"></div>
+    <!-- Simplified Section (default view now, not hidden) -->
+    <section id="simplified-section">
+      <!-- comment out header <h2>REVIEW</h2> -->
+      <div class="simple-buttons">
+        <button id="simple-next-shot-btn">Next Shot</button>
+        <button id="simple-next-artist-btn">Next Artist</button>
+        <button id="simple-undo-btn">Undo</button>
       </div>
-    </div>
-    <!-- Row 2: Elapsed Time -->
-    <div class="grid-col label-col">
-      <span class="simple-label">Elapsed:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-current-time-elapsed">00:00</span>
-    </div>
-    <div class="grid-col progress-col"></div>
-    <!-- Row 3: Remaining Time -->
-    <div class="grid-col label-col">
-      <span class="simple-label">Remaining:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-current-time-remaining">00:00</span>
-    </div>
-    <div class="grid-col progress-col"></div>
-    <!-- Divider Row: TOTAL REMAINING -->
-    <div class="grid-col separator" style="grid-column: 1 / span 3;"></div>
-    <!-- Row 4: Total Review Time -->
-    <div class="grid-col label-col">
-      <span class="simple-label">Total:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-total-time-remaining">00:00</span>
-    </div>
-    <div class="grid-col progress-col">
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-total"></div>
+      <div class="simple-grid two-column">
+        <!-- Row 1: Current Artist's Shots -->
+        <div class="grid-col label-col">
+          <span class="simple-label">Current:</span>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-current"></div>
+            <span id="simple-current-shots" class="progress-text">0</span>
+          </div>
+        </div>
+        <!-- Row 2: Elapsed Time -->
+        <div class="grid-col label-col">
+          <span class="simple-label">Elapsed:</span>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <!-- No progress bar needed here unless you want one -->
+            <span id="simple-current-time-elapsed" class="progress-text">00:00</span>
+          </div>
+        </div>
+        <!-- Row 3: Remaining Time -->
+        <div class="grid-col label-col">
+          <span class="simple-label">Remaining:</span>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <span id="simple-current-time-remaining" class="progress-text">00:00</span>
+          </div>
+        </div>
+        <!-- Divider Row: TOTAL REMAINING -->
+        <div class="grid-col separator" style="grid-column: 1 / span 2;"></div>
+        <!-- Row 4: Total Review Time -->
+        <div class="grid-col label-col">
+          <span class="simple-label">Total:</span>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-total"></div>
+            <span id="simple-total-time-remaining" class="progress-text">00:00</span>
+          </div>
+        </div>
+        <!-- Row 5: People -->
+        <div class="grid-col label-col">
+          <span class="simple-label">People:</span>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-people"></div>
+            <span id="simple-people-remaining" class="progress-text">0</span>
+          </div>
+        </div>
+        <!-- Row 6: Shots (Review Totals) -->
+        <div class="grid-col label-col">
+          <span class="simple-label">Shots:</span>
+          <button id="simple-toggle-shots-mode" class="toggle-button" title="Toggle Shots Mode"></button>
+        </div>
+        <div class="grid-col progress-info-col">
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-shots"></div>
+            <span id="simple-shots-remaining" class="progress-text">0</span>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Row 5: People -->
-    <div class="grid-col label-col">
-      <span class="simple-label">People:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-people-remaining">0</span>
-    </div>
-    <div class="grid-col progress-col">
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-people"></div>
-      </div>
-    </div>
-    <!-- Row 6: Shots (Review Totals) -->
-    <div class="grid-col label-col">
-      <span class="simple-label">Shots:</span>
-    </div>
-    <div class="grid-col info-col">
-      <span id="simple-shots-remaining">0</span>
-      <button id="simple-toggle-shots-mode" class="toggle-button" title="Toggle Shots Mode"></button>
-    </div>
-    <div class="grid-col progress-col">
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-shots"></div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Set default view to simplified: hide detailed view container, show simplified section.
+    document.addEventListener('DOMContentLoaded', () => {
+      const detailedViewContainer = document.querySelector('.bottom-section-container');
+      const simplifiedView = document.getElementById('simplified-section');
+      detailedViewContainer.style.display = 'none';
+      simplifiedView.style.display = 'block';
+    });
+  </script>
 </body>
 </html>
