@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "earl", firstName: "Earl", lastName: "Brawley" },
         { username: "donaldbrooks", firstName: "Donald", lastName: "Brooks" },
         { username: "jimbrown", firstName: "James", lastName: "Brown" },
+        { username: "hotwings", firstName: "Jane", lastName: "Cassidy" },
         { username: "hcastillo", firstName: "Heaven", lastName: "Castillo" },
         { username: "jackshaocheng", firstName: "Jack", lastName: "Cheng" },
         { username: "cchua", firstName: "Chris", lastName: "Chua" },
