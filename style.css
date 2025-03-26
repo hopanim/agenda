@@ -620,7 +620,7 @@ button:not(:disabled):active {
   border-radius: 8px;
   background-color: #f9f9f9;
   font-size: 1.0em;
-  width: 350px; /* fixed width */
+  width: 270px; /* fixed width */
 }
 
 
@@ -641,7 +641,7 @@ button:not(:disabled):active {
 
 /* Common grid cell styling */
 .grid-col {
-  padding: 2px;
+  padding: 1px;
 }
 
 .label-col {
