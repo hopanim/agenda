@@ -49,11 +49,7 @@
       </section>
     </div>
 
-    <!-- NEW: View Toggle Section (switched order: Simplified first) -->
-    <div id="view-toggle-section" class="view-toggle">
-      <button id="show-simplified-btn">1</button>
-      <button id="show-detailed-btn">2</button>
-    </div>
+
 
     <!-- Detailed View Container (hidden by default) -->
     <div class="bottom-section-container" style="display: none;">
@@ -132,15 +128,17 @@
             <span id="simple-current-time-elapsed" class="progress-text">00:00</span>
           </div>
         </div>
-        <!-- Row 3: Remaining Time -->
-        <div class="grid-col label-col">
-          <span class="simple-label">Remaining:</span>
-        </div>
-        <div class="grid-col progress-info-col">
-          <div class="progress-container">
-            <span id="simple-current-time-remaining" class="progress-text">00:00</span>
-          </div>
-        </div>
+<!-- Row 3: Remaining Time -->
+<div class="grid-col label-col">
+  <span class="simple-label">Remaining:</span>
+</div>
+<div class="grid-col progress-info-col">
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-current-time-remaining"></div>
+    <span id="simple-current-time-remaining" class="progress-text">00:00</span>
+  </div>
+</div>
+
         <!-- Divider Row: TOTAL REMAINING -->
         <div class="grid-col separator" style="grid-column: 1 / span 2;"></div>
         <!-- Row 4: Total Review Time -->
@@ -176,7 +174,12 @@
         </div>
       </div>
     </section>
-
+    
+    <!-- NEW: View Toggle Section (switched order: Simplified first) -->
+    <div id="view-toggle-section" class="view-toggle">
+      <button id="show-simplified-btn">1</button>
+      <button id="show-detailed-btn">2</button>
+    </div>
   </div>
 
   <script src="script.js"></script>

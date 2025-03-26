@@ -687,6 +687,20 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 currentArtistEstTimeRemDisplay.classList.remove('negative-time');
             }
+            // --- NEW: Update progress bar for current artist's remaining time ---
+            // Ensure the initial estimated time is set
+            if (!currentArtist.initialTpEstimatedTime) {
+                currentArtist.initialTpEstimatedTime = timeToSeconds(currentArtist.tpEstimatedTime || "00:00");
+            }
+            let percent = 0;
+            if (currentArtist.initialTpEstimatedTime > 0) {
+                percent = (remainingEstTimeForCurrent / currentArtist.initialTpEstimatedTime) * 100;
+                percent = Math.max(0, Math.min(100, percent));
+            }
+            const progressCurrentTimeRemainingEl = document.getElementById('progress-current-time-remaining');
+            if (progressCurrentTimeRemainingEl) {
+                progressCurrentTimeRemainingEl.style.width = percent + '%';
+            }
         } else {
             currentArtistNameDisplay.textContent = '';
             currentArtistTimeElapsedDisplay.textContent = '00:00';
@@ -955,6 +969,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 currentArtist.tpEstimatedTime = "00:00";
             }
+            // Initialize the current artist's initial estimated time (in seconds)
+            currentArtist.initialTpEstimatedTime = timeToSeconds(currentArtist.tpEstimatedTime || "00:00");
             startCurrentArtistTimer();
         } else {
             state.currentArtistIndex = -1;
@@ -984,6 +1000,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 currentArtist.tpEstimatedTime = "00:00";
             }
+            // Reinitialize initial estimated time if needed
+            currentArtist.initialTpEstimatedTime = timeToSeconds(currentArtist.tpEstimatedTime || "00:00");
             startCurrentArtistTimer();
         }
         state.sessionStarted = true;
@@ -1221,6 +1239,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentArtist.tpEstimatedTime = "00:00";
         }
+        // Initialize the current artist's initial estimated time (in seconds)
+        currentArtist.initialTpEstimatedTime = timeToSeconds(currentArtist.tpEstimatedTime || "00:00");
         startSessionTimer();
         startCurrentArtistTimer();
         nextArtistBtn.disabled = false;
