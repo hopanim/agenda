@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "earl", firstName: "Earl", lastName: "Brawley" },
         { username: "donaldbrooks", firstName: "Donald", lastName: "Brooks" },
         { username: "jimbrown", firstName: "James", lastName: "Brown" },
+        { username: "jbrownbill", firstName: "Jude", lastName: "Brownbill" },
         { username: "hotwings", firstName: "Jane", lastName: "Cassidy" },
         { username: "hcastillo", firstName: "Heaven", lastName: "Castillo" },
         { username: "jackshaocheng", firstName: "Jack", lastName: "Cheng" },
@@ -139,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { username: "camryngray", firstName: "Camryn", lastName: "Gray" },
         { username: "jgustovich", firstName: "Jordan", lastName: "Gustovich" },
         { username: "ahatfield", firstName: "Aron", lastName: "Hatfield" },
+        { username: "travis", firstName: "Travis", lastName: "Hathaway" },
         { username: "chaynes", firstName: "Christopher", lastName: "Haynes" },
         { username: "thsieh", firstName: "Trevor", lastName: "Hsieh" },
         { username: "dkane", firstName: "Dallas", lastName: "Kane" },
@@ -215,6 +217,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return 0;
     });
 
+    // --- Helper Function for Scoring Matches ---
+    function getMatchScore(user, query) {
+        query = query.toLowerCase();
+        let score = 0;
+        const firstName = user.firstName.toLowerCase();
+        const lastName = user.lastName.toLowerCase();
+        const username = user.username.toLowerCase();
+        
+        // Prioritize firstName
+        if (firstName.startsWith(query)) {
+            score -= 100;
+        } else if (firstName.includes(query)) {
+            score -= 50;
+        }
+        
+        // Next, lastName
+        if (lastName.startsWith(query)) {
+            score -= 80;
+        } else if (lastName.includes(query)) {
+            score -= 40;
+        }
+        
+        // Finally, username
+        if (username.startsWith(query)) {
+            score -= 60;
+        }
+        return score;
+    }
+
     // --- Autocomplete Function ---
     function autocomplete(inp, arr) {
         let currentFocus;
@@ -227,33 +258,52 @@ document.addEventListener('DOMContentLoaded', () => {
             a.setAttribute("id", this.id + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             this.insertAdjacentElement('afterend', a);
-            for (let i = 0; i < arr.length; i++) {
-                const user = arr[i];
+            
+            // Filter for matching users
+            const matches = arr.filter(user => {
                 const firstNameMatch = user.firstName.toLowerCase().includes(val.toLowerCase());
                 const lastNameMatch = user.lastName.toLowerCase().includes(val.toLowerCase());
                 const usernameMatch = user.username.toLowerCase().startsWith(val.toLowerCase());
-                if (firstNameMatch || lastNameMatch || usernameMatch) {
-                    const b = document.createElement("DIV");
-                    b.innerHTML = user.username;
-                    b.innerHTML += "<input type='hidden' value='" + user.username + "'>";
-                    b.style.width = "100%";
-                    b.style.height = "auto";
-                    b.style.display = "block";
-                    b.addEventListener("click", function(e) {
-                        inp.value = this.getElementsByTagName("input")[0].value;
-                        const artistId = parseInt(inp.closest('li').dataset.id, 10);
-                        const artist = state.artists.find(a => a.id === artistId);
-                        if (artist) {
-                            artist.name = inp.value;
-                            updateDisplay();
-                        }
-                        closeAllLists();
-                    });
-                    b.addEventListener("mousedown", function(e) {
-                        e.stopPropagation();
-                    });
-                    a.appendChild(b);
-                }
+                return firstNameMatch || lastNameMatch || usernameMatch;
+            });
+            
+            // Sort matches based on match score and then alphabetically
+            matches.sort((a, b) => {
+                const scoreA = getMatchScore(a, val);
+                const scoreB = getMatchScore(b, val);
+                if (scoreA !== scoreB) return scoreA - scoreB;
+                if (a.firstName < b.firstName) return -1;
+                if (a.firstName > b.firstName) return 1;
+                if (a.lastName < b.lastName) return -1;
+                if (a.lastName > b.lastName) return 1;
+                if (a.username < b.username) return -1;
+                if (a.username > b.username) return 1;
+                return 0;
+            });
+            
+            // Create autocomplete suggestions
+            for (let i = 0; i < matches.length; i++) {
+                const user = matches[i];
+                const b = document.createElement("DIV");
+                b.innerHTML = user.username;
+                b.innerHTML += "<input type='hidden' value='" + user.username + "'>";
+                b.style.width = "100%";
+                b.style.height = "auto";
+                b.style.display = "block";
+                b.addEventListener("click", function(e) {
+                    inp.value = this.getElementsByTagName("input")[0].value;
+                    const artistId = parseInt(inp.closest('li').dataset.id, 10);
+                    const artist = state.artists.find(a => a.id === artistId);
+                    if (artist) {
+                        artist.name = inp.value;
+                        updateDisplay();
+                    }
+                    closeAllLists();
+                });
+                b.addEventListener("mousedown", function(e) {
+                    e.stopPropagation();
+                });
+                a.appendChild(b);
             }
         });
         inp.addEventListener("keydown", function(e) {

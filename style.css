@@ -393,6 +393,7 @@ button:not(:disabled):active {
     background-color: #bdc3c7;
     cursor: default;
     box-shadow: none;
+    opacity: 1;
 }
 
 /* ====================================================
